@@ -309,6 +309,7 @@ export function parse (
     },
 
     chars (text: string, start: number, end: number) {
+      // 文本错误提示
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
           if (text === template) {
@@ -325,17 +326,20 @@ export function parse (
         }
         return
       }
+
+      // IE textarea bug处理
       // IE textarea placeholder bug
-      /* istanbul ignore if */
+      /* istanbul ignore if */ // istanbul注释语法 在计算覆盖率的时候会被忽略
       if (isIE &&
         currentParent.tag === 'textarea' &&
         currentParent.attrsMap.placeholder === text
       ) {
         return
       }
+
       const children = currentParent.children
       if (inPre || text.trim()) {
-        text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
+        text = isTextTag(currentParent) ? text : decodeHTMLCached(text) // decodeHTMLCached内部会调用一个npm包he进行解码；并且会把当前内容缓存起来
       } else if (!children.length) {
         // remove the whitespace-only node right after an opening tag
         text = ''
@@ -357,6 +361,8 @@ export function parse (
         }
         let res
         let child: ?ASTNode
+
+        // 解析文本
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           child = {
             type: 2,
