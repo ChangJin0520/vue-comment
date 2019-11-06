@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="/vue-2.2.6/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        {{ test }}
+        <p @click="show" disable>{{text}}123</p>
+    </div>
+    <script type="text/javascript">
+        var vm = new Vue({
+            data: {
+                test: '测试',
+                text: '要显示的文本'
+            },
+            methods: {
+                show() {
+                    alert(this.text);
+                }
+            }
+        }).$mount('#app');
+
+    </script>
+</body>
+
+</html>
