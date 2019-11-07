@@ -11,7 +11,7 @@
 
 <body>
     <div id="app">
-        &copy;©{{ test }}
+        &copy;©{{ test \/124)/ | add }}
         <p @click="show" disable>{{text}}123</p>
     </div>
     <script type="text/javascript">
@@ -23,6 +23,11 @@
             methods: {
                 show() {
                     alert(this.text);
+                }
+            },
+            filters: {
+                add(val, other) {
+                    return val + '1' + other;
                 }
             }
         }).$mount('#app');

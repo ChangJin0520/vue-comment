@@ -2,6 +2,7 @@
 
 const validDivisionCharRE = /[\w).+\-_$\]]/
 
+// 过滤器解析会在 解析 文本和属性的时候用到 Chang-Jin 2019-11-07
 export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
@@ -16,6 +17,9 @@ export function parseFilters (exp: string): string {
   for (i = 0; i < exp.length; i++) {
     prev = c
     c = exp.charCodeAt(i)
+
+    // 以下逻辑 可以保证 ' " ` ( [ { 以及正则表达式 中的 | 无效 Chang-Jin 2019-11-07
+    // prev !== 0x5C 保证了转义的正常 \ Chang-Jin 2019-11-07
     if (inSingle) {
       if (c === 0x27 && prev !== 0x5C) inSingle = false
     } else if (inDouble) {
@@ -25,10 +29,10 @@ export function parseFilters (exp: string): string {
     } else if (inRegex) {
       if (c === 0x2f && prev !== 0x5C) inRegex = false
     } else if (
-      c === 0x7C && // pipe
-      exp.charCodeAt(i + 1) !== 0x7C &&
+      c === 0x7C && // pipe |
+      exp.charCodeAt(i + 1) !== 0x7C && // 排查及||情况 Chang-Jin 2019-11-07
       exp.charCodeAt(i - 1) !== 0x7C &&
-      !curly && !square && !paren
+      !curly && !square && !paren // 排除([{ Chang-Jin 2019-11-07
     ) {
       if (expression === undefined) {
         // first filter, end of expression
@@ -90,6 +94,7 @@ function wrapFilter (exp: string, filter: string): string {
     // _f: resolveFilter
     return `_f("${filter}")(${exp})`
   } else {
+    // 处理过滤器传参
     const name = filter.slice(0, i)
     const args = filter.slice(i + 1)
     return `_f("${name}")(${exp}${args !== ')' ? ',' + args : args}`
