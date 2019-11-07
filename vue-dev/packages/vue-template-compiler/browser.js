@@ -1698,6 +1698,7 @@
 
   var validDivisionCharRE = /[\w).+\-_$\]]/;
 
+  // 过滤器解析会在 解析 文本和属性的时候用到 Chang-Jin 2019-11-07
   function parseFilters (exp) {
     var inSingle = false;
     var inDouble = false;
@@ -1712,6 +1713,9 @@
     for (i = 0; i < exp.length; i++) {
       prev = c;
       c = exp.charCodeAt(i);
+
+      // 以下逻辑 可以保证 ' " ` ( [ { 以及正则表达式 中的 | 无效 Chang-Jin 2019-11-07
+      // prev !== 0x5C 保证了转义的正常 \ Chang-Jin 2019-11-07
       if (inSingle) {
         if (c === 0x27 && prev !== 0x5C) { inSingle = false; }
       } else if (inDouble) {
@@ -1721,10 +1725,10 @@
       } else if (inRegex) {
         if (c === 0x2f && prev !== 0x5C) { inRegex = false; }
       } else if (
-        c === 0x7C && // pipe
-        exp.charCodeAt(i + 1) !== 0x7C &&
+        c === 0x7C && // pipe |
+        exp.charCodeAt(i + 1) !== 0x7C && // 排查及||情况 Chang-Jin 2019-11-07
         exp.charCodeAt(i - 1) !== 0x7C &&
-        !curly && !square && !paren
+        !curly && !square && !paren // 排除([{ Chang-Jin 2019-11-07
       ) {
         if (expression === undefined) {
           // first filter, end of expression
@@ -1786,6 +1790,7 @@
       // _f: resolveFilter
       return ("_f(\"" + filter + "\")(" + exp + ")")
     } else {
+      // 处理过滤器传参
       var name = filter.slice(0, i);
       var args = filter.slice(i + 1);
       return ("_f(\"" + name + "\")(" + exp + (args !== ')' ? ',' + args : args))
@@ -1809,27 +1814,35 @@
     text,
     delimiters
   ) {
-    var tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE;
+    var tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE; // 处理自定义分割符
+
+    // 未找到模板语法直接返回
     if (!tagRE.test(text)) {
       return
     }
-    var tokens = [];
-    var rawTokens = [];
+    var tokens = []; // 解析后的文本数组
+    var rawTokens = []; // 原文本数组
     var lastIndex = tagRE.lastIndex = 0;
     var match, index, tokenValue;
+
+    // 匹配模板语法
     while ((match = tagRE.exec(text))) {
-      index = match.index;
+      index = match.index; // 匹配到的索引
+
       // push text token
       if (index > lastIndex) {
         rawTokens.push(tokenValue = text.slice(lastIndex, index));
         tokens.push(JSON.stringify(tokenValue));
       }
       // tag token
-      var exp = parseFilters(match[1].trim());
-      tokens.push(("_s(" + exp + ")"));
+      var exp = parseFilters(match[1].trim()); // 解析过滤器 得到 表达式
+
+      tokens.push(("_s(" + exp + ")")); // _s是预定义的函数
       rawTokens.push({ '@binding': exp });
       lastIndex = index + match[0].length;
     }
+
+    // 模板语法后的文本内容
     if (lastIndex < text.length) {
       rawTokens.push(tokenValue = text.slice(lastIndex));
       tokens.push(JSON.stringify(tokenValue));
@@ -2952,6 +2965,7 @@
       },
 
       chars: function chars (text, start, end) {
+        // 文本错误提示
         if (!currentParent) {
           {
             if (text === template) {
@@ -2968,17 +2982,20 @@
           }
           return
         }
+
+        // IE textarea bug处理
         // IE textarea placeholder bug
-        /* istanbul ignore if */
+        /* istanbul ignore if */ // istanbul注释语法 在计算覆盖率的时候会被忽略
         if (isIE &&
           currentParent.tag === 'textarea' &&
           currentParent.attrsMap.placeholder === text
         ) {
           return
         }
+
         var children = currentParent.children;
         if (inPre || text.trim()) {
-          text = isTextTag(currentParent) ? text : decodeHTMLCached(text);
+          text = isTextTag(currentParent) ? text : decodeHTMLCached(text); // decodeHTMLCached内部会调用一个npm包he进行解码；并且会把当前内容缓存起来
         } else if (!children.length) {
           // remove the whitespace-only node right after an opening tag
           text = '';
@@ -3000,6 +3017,8 @@
           }
           var res;
           var child;
+
+          // 解析文本
           if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
             child = {
               type: 2,
