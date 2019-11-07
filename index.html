@@ -11,7 +11,7 @@
 
 <body>
     <div id="app">
-        &copy;©{{ test \/124)/ | add }}
+        &copy;©{{ test | add }}
         <p @click="show" disable>{{text}}123</p>
     </div>
     <script type="text/javascript">
@@ -26,8 +26,8 @@
                 }
             },
             filters: {
-                add(val, other) {
-                    return val + '1' + other;
+                add(val) {
+                    return val + '1';
                 }
             }
         }).$mount('#app');

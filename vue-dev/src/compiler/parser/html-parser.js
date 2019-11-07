@@ -15,7 +15,7 @@ import { unicodeRegExp } from 'core/util/lang'
 
 // Regular Expressions for parsing tags and attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
-const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/ // 匹配动态特性 Chang-Jin 2019-11-07
 const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
@@ -185,7 +185,7 @@ export function parseHTML (html, options) {
   }
 
   function parseStartTag () {
-    const start = html.match(startTagOpen)
+    const start = html.match(startTagOpen) // 匹配开始标签 不带> Chang-Jin 2019-11-07
     if (start) {
       const match = {
         tagName: start[1],
@@ -194,14 +194,18 @@ export function parseHTML (html, options) {
       }
       advance(start[0].length)
       let end, attr
+
+      // startTagClose是匹配标签的 /> 或 > dynamicArgAttribute是匹配动态属性 attribute 是匹配属性 Chang-Jin 2019-11-07
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index
         advance(attr[0].length)
         attr.end = index
         match.attrs.push(attr)
       }
+
+      // 如果匹配到开始标签的> 则根据是否匹配到/来判断是否是单标签 Chang-Jin 2019-11-07
       if (end) {
-        match.unarySlash = end[1]
+        match.unarySlash = end[1] // 匹配到的/
         advance(end[0].length)
         match.end = index
         return match
@@ -217,6 +221,8 @@ export function parseHTML (html, options) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
       }
+
+      // 能够不闭合的标签?
       if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
         parseEndTag(tagName)
       }
@@ -228,14 +234,17 @@ export function parseHTML (html, options) {
     const attrs = new Array(l)
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
+      // args[3]是匹配到""包含的属性值 args[4]是匹配到''包含的属性值 args[5]是无引号包含的属性值 Chang-Jin 2019-11-07
       const value = args[3] || args[4] || args[5] || ''
       const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
         ? options.shouldDecodeNewlinesForHref
         : options.shouldDecodeNewlines
       attrs[i] = {
         name: args[1],
-        value: decodeAttr(value, shouldDecodeNewlines)
+        value: decodeAttr(value, shouldDecodeNewlines) //这里会对属性的值进行解码 防止IE上出BUG
       }
+
+      // 不是开发环境下需要属性的start和end值
       if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         attrs[i].start = args.start + args[0].match(/^\s*/).length
         attrs[i].end = args.end
