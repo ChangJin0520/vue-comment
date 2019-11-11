@@ -11,8 +11,10 @@
 
 <body>
     <div id="app">
+        <br>
         &copy;©{{ test | add }}
-        <p @click="show" disable>{{text}}123</p>
+        <p @click="show" disable>{{text}} <span>123</span></p>
+        <input type="text" v-model="test">
     </div>
     <script type="text/javascript">
         var vm = new Vue({

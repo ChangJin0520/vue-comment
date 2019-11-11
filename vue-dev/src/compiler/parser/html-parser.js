@@ -218,6 +218,7 @@ export function parseHTML (html, options) {
     const unarySlash = match.unarySlash
 
     if (expectHTML) {
+        // p标签中插入nonPhrasingTag p标签会在插入标签前自动闭合 Chang-Jin 2019-11-08
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
       }
@@ -297,7 +298,7 @@ export function parseHTML (html, options) {
       }
 
       // Remove the open elements from the stack
-      stack.length = pos
+      stack.length = pos // 修改数组长度实现出栈 Chang-Jin 2019-11-08
       lastTag = pos && stack[pos - 1].tag
     } else if (lowerCasedTagName === 'br') {
       if (options.start) {

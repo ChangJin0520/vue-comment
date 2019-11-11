@@ -227,6 +227,7 @@ export function parse (
       }
 
       if (process.env.NODE_ENV !== 'production') {
+        // 非生产环境 报错什么的需要提示位置
         if (options.outputSourceRange) {
           element.start = start
           element.end = end
@@ -235,6 +236,8 @@ export function parse (
             return cumulated
           }, {})
         }
+
+        // 检查属性值
         attrs.forEach(attr => {
           if (invalidAttributeRE.test(attr.name)) {
             warn(
@@ -249,6 +252,7 @@ export function parse (
         })
       }
 
+      // 检查标签
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
