@@ -9,6 +9,7 @@ type CompiledFunctionResult = {
   staticRenderFns: Array<Function>;
 };
 
+// 利用了new Function生成render函数 并catch错误。 Chang-Jin 2019-11-12
 function createFunction (code, errors) {
   try {
     return new Function(code)
@@ -19,6 +20,7 @@ function createFunction (code, errors) {
 }
 
 export function createCompileToFunctionFn (compile: Function): Function {
+  // 缓存编译之后的模板，方便之后复用 Chang-Jin 2019-11-12
   const cache = Object.create(null)
 
   return function compileToFunctions (
@@ -52,13 +54,16 @@ export function createCompileToFunctionFn (compile: Function): Function {
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
+
+    // 从缓存中获取编译结果，没有则调用compile函数来编译 Chang-Jin 2019-11-12
     if (cache[key]) {
       return cache[key]
     }
 
-    // compile
+    // compile 把模板编译为ast语法树和render字符串
     const compiled = compile(template, options)
 
+    // 非生产环境下，这里会抛出编译过程中产生的错误
     // check compilation errors/tips
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
@@ -90,7 +95,10 @@ export function createCompileToFunctionFn (compile: Function): Function {
     // turn code into functions
     const res = {}
     const fnGenErrors = []
+
+    // 通过new Function的方式把render字符串 转化为 render函数 Chang-Jin 2019-11-12
     res.render = createFunction(compiled.render, fnGenErrors)
+
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)
     })

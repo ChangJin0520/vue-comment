@@ -15,6 +15,7 @@
         &copy;©{{ test | add }}
         <p @click="show" disable>{{text}} <span>123</span></p>
         <input type="text" v-model="test">
+        <p>静态内容</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
@@ -33,7 +34,6 @@
                 }
             }
         }).$mount('#app');
-
     </script>
 </body>
 
