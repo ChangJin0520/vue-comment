@@ -11,19 +11,16 @@
 
 <body>
     <div id="app">
-        这里是文本<箭头之后的文本
-        <a :href="url" target="_blank">前面的文本{{title}}后面的文本</a>
-        <img :src="img" />
+        这里是文本<箭头之后的文本 <p>{{message}}</p>
+            <p>静态文本<a href="https://www.imliutao.com">博客地址</a></p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
             data: {
-                url: 'https://www.imliutao.com',
-                title: '刘涛的个人小站',
-                img: 'https://pic1.zhimg.com/092406f3919e915fffc7ef2f2410e560_is.jpg'
+                message: '动态文本'
             }
-        });
+        })
 
     </script>
 </body>
