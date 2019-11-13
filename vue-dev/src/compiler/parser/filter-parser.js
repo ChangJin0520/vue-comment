@@ -1,6 +1,6 @@
 /* @flow */
 
-const validDivisionCharRE = /[\w).+\-_$\]]/
+const validDivisionCharRE = /[\w).+\-_$\]]/ // 判断表达式是不是正则 Chang-Jin 2019-11-13
 
 // 过滤器解析会在 解析 文本和属性的时候用到 Chang-Jin 2019-11-07
 export function parseFilters (exp: string): string {

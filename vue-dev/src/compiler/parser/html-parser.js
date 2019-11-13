@@ -16,12 +16,22 @@ import { unicodeRegExp } from 'core/util/lang'
 // Regular Expressions for parsing tags and attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
 const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/ // 匹配动态特性 Chang-Jin 2019-11-07
+
+// 匹配其实标签名 Chang-Jin 2019-11-13
 const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
+
+// 匹配起始标签的结束部分 做了一个单标签区分/ Chang-Jin 2019-11-13
 const startTagClose = /^\s*(\/?)>/
+
+// 匹配双标签的结束标签 Chang-Jin 2019-11-13
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+
+// 文档声明 Chang-Jin 2019-11-13
 const doctype = /^<!DOCTYPE [^>]+>/i
+
+// html注释 Chang-Jin 2019-11-13
 // #7298: escape - to avoid being passed as HTML comment when inlined in page
 const comment = /^<!\--/
 const conditionalComment = /^<!\[/

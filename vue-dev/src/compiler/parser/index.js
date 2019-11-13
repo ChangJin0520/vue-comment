@@ -21,19 +21,19 @@ import {
   getAndRemoveAttrByRegex
 } from '../helpers'
 
-export const onRE = /^@|^v-on:/
-export const dirRE = process.env.VBIND_PROP_SHORTHAND
+export const onRE = /^@|^v-on:/ // 匹配添加事件的语法 Chang-Jin 2019-11-13
+export const dirRE = process.env.VBIND_PROP_SHORTHAND // 匹配绑定数据或事件的语法 Chang-Jin 2019-11-13
   ? /^v-|^@|^:|^\.|^#/
   : /^v-|^@|^:|^#/
-export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
-export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
+export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/ // 匹配v-for中的属性 如item in items、(item, index) of items Chang-Jin 2019-11-13
+export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/ // 对forAliasRE中第一个捕获内容的拆解 in | of 前的部分 Chang-Jin 2019-11-13
 const stripParensRE = /^\(|\)$/g
 const dynamicArgRE = /^\[.*\]$/
 
-const argRE = /:(.*)$/
-export const bindRE = /^:|^\.|^v-bind:/
+const argRE = /:(.*)$/ // :开头的属性 Chang-Jin 2019-11-13
+export const bindRE = /^:|^\.|^v-bind:/ // 匹配:或v-bind开头的属性 Chang-Jin 2019-11-13
 const propBindRE = /^\./
-const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g
+const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g // 匹配事件指令的修饰符 Chang-Jin 2019-11-13
 
 const slotRE = /^v-slot(:|$)|^#/
 

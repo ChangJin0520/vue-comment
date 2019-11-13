@@ -3,8 +3,8 @@
 import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'
 
-const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g
-const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
+const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g // 默认模板分割符匹配 Chang-Jin 2019-11-13
+const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g // 匹配需要转义的字符 Chang-Jin 2019-11-13
 
 const buildRegex = cached(delimiters => {
   const open = delimiters[0].replace(regexEscapeRE, '\\$&')
