@@ -82,9 +82,9 @@ export function parse (
 ): ASTElement | void {
   warn = options.warn || baseWarn
 
-  platformIsPreTag = options.isPreTag || no
-  platformMustUseProp = options.mustUseProp || no
-  platformGetTagNamespace = options.getTagNamespace || no
+  platformIsPreTag = options.isPreTag || no // 是不是pre标签 Chang-Jin 2019-11-13
+  platformMustUseProp = options.mustUseProp || no // 是否需要通过绑定prop来绑定属性 Chang-Jin 2019-11-13
+  platformGetTagNamespace = options.getTagNamespace || no // 获取tag的命名空间 svg或math Chang-Jin 2019-11-13
   const isReservedTag = options.isReservedTag || no
   maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
 
@@ -92,7 +92,7 @@ export function parse (
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
 
-  delimiters = options.delimiters
+  delimiters = options.delimiters // 自定义模板字符
 
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
@@ -146,6 +146,8 @@ export function parse (
           const name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         }
+
+        // 标签父子关系 Chang-Jin 2019-11-13
         currentParent.children.push(element)
         element.parent = currentParent
       }
@@ -164,6 +166,8 @@ export function parse (
     if (platformIsPreTag(element.tag)) {
       inPre = false
     }
+
+    // 后处理 Chang-Jin 2019-11-13
     // apply post-transforms
     for (let i = 0; i < postTransforms.length; i++) {
       postTransforms[i](element, options)
@@ -221,6 +225,7 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
+      // 定义基本的ast结构 Chang-Jin 2019-11-13
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
@@ -263,12 +268,14 @@ export function parse (
         )
       }
 
+      // 对ast进行预处理 Chang-Jin 2019-11-13
       // apply pre-transforms
       for (let i = 0; i < preTransforms.length; i++) {
         element = preTransforms[i](element, options) || element
       }
 
       if (!inVPre) {
+        // 解析v-pre指令 Chang-Jin 2019-11-13
         processPre(element)
         if (element.pre) {
           inVPre = true
@@ -280,6 +287,7 @@ export function parse (
       if (inVPre) {
         processRawAttrs(element)
       } else if (!element.processed) {
+        // 解析v-if v-for v-once指令 Chang-Jin 2019-11-13
         // structural directives
         processFor(element)
         processIf(element)
@@ -303,6 +311,7 @@ export function parse (
 
     end (tag, start, end) {
       const element = stack[stack.length - 1]
+      // 出栈 Chang-Jin 2019-11-13
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
@@ -440,6 +449,7 @@ export function processElement (
   element: ASTElement,
   options: CompilerOptions
 ) {
+  // 解析key指令 Chang-Jin 2019-11-13
   processKey(element)
 
   // determine whether this is a plain element after
@@ -450,13 +460,17 @@ export function processElement (
     !element.attrsList.length
   )
 
+  // 解析ref slot component指令 Chang-Jin 2019-11-13
   processRef(element)
   processSlotContent(element)
   processSlotOutlet(element)
   processComponent(element)
+
+  // 对ast处理 Chang-Jin 2019-11-13
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
   }
+
   processAttrs(element)
   return element
 }
@@ -771,6 +785,8 @@ function processAttrs (el) {
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
+
+    // 判断是否为指令
     if (dirRE.test(name)) {
       // mark element as dynamic
       el.hasBindings = true
@@ -783,6 +799,8 @@ function processAttrs (el) {
       } else if (modifiers) {
         name = name.replace(modifierRE, '')
       }
+
+      // 解析v-bind属性 Chang-Jin 2019-11-13
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         value = parseFilters(value)
@@ -851,6 +869,8 @@ function processAttrs (el) {
         } else {
           addAttr(el, name, value, list[i], isDynamic)
         }
+
+      // 解析v-on属性 Chang-Jin 2019-11-13
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
         isDynamic = dynamicArgRE.test(name)
@@ -877,6 +897,7 @@ function processAttrs (el) {
         }
       }
     } else {
+      // 普通属性 Chang-Jin 2019-11-13
       // literal attribute
       if (process.env.NODE_ENV !== 'production') {
         const res = parseText(value, delimiters)
@@ -890,6 +911,8 @@ function processAttrs (el) {
           )
         }
       }
+
+      // 把属性添加到ast的element上 Chang-Jin 2019-11-13
       addAttr(el, name, JSON.stringify(value), list[i])
       // #6887 firefox doesn't update muted state if set via attribute
       // even immediately after element creation

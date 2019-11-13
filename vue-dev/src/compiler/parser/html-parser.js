@@ -68,12 +68,16 @@ export function parseHTML (html, options) {
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
+
+  // html为模板 Chang-Jin 2019-11-13
   while (html) {
-    last = html
+    last = html // last保存还没解析的模板部分 Chang-Jin 2019-11-13
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
+
+        // 过滤注释 Chang-Jin 2019-11-13
         // Comment:
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
@@ -87,6 +91,7 @@ export function parseHTML (html, options) {
           }
         }
 
+        // 过滤html注释 Chang-Jin 2019-11-13
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
@@ -97,6 +102,7 @@ export function parseHTML (html, options) {
           }
         }
 
+        // 过滤doctype Chang-Jin 2019-11-13
         // Doctype:
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
@@ -104,6 +110,7 @@ export function parseHTML (html, options) {
           continue
         }
 
+        // 匹配结束标签 Chang-Jin 2019-11-13
         // End tag:
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
@@ -189,13 +196,15 @@ export function parseHTML (html, options) {
   // Clean up any remaining tags
   parseEndTag()
 
+  // 把html从n位截取 并记录索引index的位置 Chang-Jin 2019-11-13
   function advance (n) {
     index += n
     html = html.substring(n)
   }
 
   function parseStartTag () {
-    const start = html.match(startTagOpen) // 匹配开始标签 不带> Chang-Jin 2019-11-07
+    // 匹配标签名 Chang-Jin 2019-11-07
+    const start = html.match(startTagOpen)
     if (start) {
       const match = {
         tagName: start[1],
@@ -223,6 +232,7 @@ export function parseHTML (html, options) {
     }
   }
 
+  // 对匹配到的开始标签 进一步加工 Chang-Jin 2019-11-13
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash

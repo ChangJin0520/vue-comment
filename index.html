@@ -11,29 +11,20 @@
 
 <body>
     <div id="app">
-        <br>
-        &copy;©{{ test | add }}
-        <p @click="show" disable>{{text}} <span>123</span></p>
-        <input type="text" v-model="test">
-        <p>静态内容</p>
+        这里是文本<箭头之后的文本
+        <a :href="url" target="_blank">前面的文本{{title}}后面的文本</a>
+        <img :src="img" />
     </div>
     <script type="text/javascript">
         var vm = new Vue({
+            el: '#app',
             data: {
-                test: '测试',
-                text: '要显示的文本'
-            },
-            methods: {
-                show() {
-                    alert(this.text);
-                }
-            },
-            filters: {
-                add(val) {
-                    return val + '1';
-                }
+                url: 'https://www.imliutao.com',
+                title: '刘涛的个人小站',
+                img: 'https://pic1.zhimg.com/092406f3919e915fffc7ef2f2410e560_is.jpg'
             }
-        }).$mount('#app');
+        });
+
     </script>
 </body>
 
