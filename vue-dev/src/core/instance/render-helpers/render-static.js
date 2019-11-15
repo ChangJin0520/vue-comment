@@ -3,6 +3,14 @@
 /**
  * Runtime helper for rendering static trees.
  */
+/**
+ * 渲染静态内容
+ *
+ * @export
+ * @param {number} index 索引值 指向最终生成的staticRenderFns数组中对应的内容
+ * @param {boolean} isInFor 标识元素是否包裹在for循环中
+ * @returns {(VNode | Array<VNode>)}
+ */
 export function renderStatic (
   index: number,
   isInFor: boolean

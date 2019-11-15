@@ -11,14 +11,15 @@
 
 <body>
     <div id="app">
-        这里是文本<箭头之后的文本 <p>{{message}}</p>
-            <p>静态文本<a href="https://www.imliutao.com">博客地址</a></p>
+        <a :href="url">{{message}}</a>
+        <p>静态根节点<span>静态内容</span></p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
             data: {
-                message: '动态文本'
+                message: '博客地址',
+                url: 'https://www.imliutao.com'
             }
         })
 

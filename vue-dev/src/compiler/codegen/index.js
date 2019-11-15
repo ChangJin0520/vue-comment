@@ -72,12 +72,14 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   } else {
     // component or element
     let code
+
+    // el.component保存的是<component :is="xxx">标签上is指向的模板 Chang-Jin 2019-11-15
     if (el.component) {
       code = genComponent(el.component, el, state)
     } else {
       let data
       if (!el.plain || (el.pre && state.maybeComponent(el))) {
-        data = genData(el, state)
+        data = genData(el, state) // genData 用来生成_c第二个参数--给元素添加的属性 Chang-Jin 2019-11-15
       }
 
       const children = el.inlineTemplate ? null : genChildren(el, state, true)
@@ -96,6 +98,13 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 }
 
 // hoist static sub-trees out
+/**
+ * 处理静态节点
+ *
+ * @param {ASTElement} el AST元素
+ * @param {CodegenState} state
+ * @returns {string} 一个处理静态节点的render函数字符串
+ */
 function genStatic (el: ASTElement, state: CodegenState): string {
   el.staticProcessed = true
   // Some elements (templates) need to behave differently inside of a v-pre
@@ -105,10 +114,10 @@ function genStatic (el: ASTElement, state: CodegenState): string {
   if (el.pre) {
     state.pre = el.pre
   }
-  state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
+  state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`) // 对静态根节点及其子内容单独分离出来处理。 Chang-Jin 2019-11-15
   state.pre = originalPreState
   return `_m(${
-    state.staticRenderFns.length - 1
+    state.staticRenderFns.length - 1 // 注意这里传的正是当前静态文本在state.staticRenderFns中的索引 Chang-Jin 2019-11-15
   }${
     el.staticInFor ? ',true' : ''
   })`
@@ -249,7 +258,7 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // attributes
   if (el.attrs) {
-    data += `attrs:${genProps(el.attrs)},`
+    data += `attrs:${genProps(el.attrs)},` // genProps把属性链接为字符串 Chang-Jin 2019-11-15
   }
   // DOM props
   if (el.props) {
@@ -495,6 +504,10 @@ export function genChildren (
 // 0: no normalization needed
 // 1: simple normalization needed (possible 1-level deep nested array)
 // 2: full normalization needed
+// 确定子数组所需的归一化。
+// 0：无需归一化
+// 1：需要简单的归一化（可能的1级深度嵌套数组）
+// 2：需要完全归一化
 function getNormalizationType (
   children: Array<ASTNode>,
   maybeComponent: (el: ASTElement) => boolean
