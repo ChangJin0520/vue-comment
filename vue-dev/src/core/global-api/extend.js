@@ -10,17 +10,23 @@ export function initExtend (Vue: GlobalAPI) {
    * cid. This enables us to create wrapped "child
    * constructors" for prototypal inheritance and cache them.
    */
+
+   // 每个继承Vue的对象都有唯一的cid Chang-Jin 2019-11-18
   Vue.cid = 0
   let cid = 1
 
   /**
    * Class inheritance
    */
+  // 该方法返回一个Vue对象的子类 Chang-Jin 2019-11-18
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
-    const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+    const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {}) // extendOptions._Ctor用于缓存构造函数 Chang-Jin 2019-11-18
+
+    // 页面数据有更新，则会重新生成vnode并做diff
+    // 在第二次生成vnode过程中，调用Vue.extend直接从缓存中取 Chang-Jin 2019-11-18
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
@@ -30,12 +36,14 @@ export function initExtend (Vue: GlobalAPI) {
       validateComponentName(name)
     }
 
+    // 创建Sub子类 Chang-Jin 2019-11-18
     const Sub = function VueComponent (options) {
       this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
-    Sub.cid = cid++
+
+    Sub.cid = cid++ // 每次通过Vue.extend创建的子类的cid值依次递增 Chang-Jin 2019-11-18
     Sub.options = mergeOptions(
       Super.options,
       extendOptions

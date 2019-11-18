@@ -10,19 +10,20 @@
 </head>
 
 <body>
-    <div id="app">
-        <a :href="url">{{message}}</a>
-        <p>静态根节点<span>静态内容</span></p>
-    </div>
+    <div id="mount-point"></div>
     <script type="text/javascript">
-        var vm = new Vue({
-            el: '#app',
-            data: {
-                message: '博客地址',
-                url: 'https://www.imliutao.com'
+        var Profile = Vue.extend({
+            template: '<p>{{firstName}} {{lastName}} aka {{alias}}</p>',
+            data: function() {
+                return {
+                    firstName: 'Walter',
+                    lastName: 'White',
+                    alias: 'Heisenberg'
+                }
             }
         })
 
+        new Profile().$mount('#mount-point')
     </script>
 </body>
 
