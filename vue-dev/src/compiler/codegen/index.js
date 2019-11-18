@@ -28,7 +28,7 @@ export class CodegenState {
     this.dataGenFns = pluckModuleFunction(options.modules, 'genData')
     this.directives = extend(extend({}, baseDirectives), options.directives)
     const isReservedTag = options.isReservedTag || no
-    this.maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
+    this.maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag) // 是一个组件 或者 不标签名不是保留标签 Chang-Jin 2019-11-18
     this.onceId = 0
     this.staticRenderFns = []
     this.pre = false
@@ -114,7 +114,9 @@ function genStatic (el: ASTElement, state: CodegenState): string {
   if (el.pre) {
     state.pre = el.pre
   }
-  state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`) // 对静态根节点及其子内容单独分离出来处理。 Chang-Jin 2019-11-15
+
+  // 对静态根节点及其子内容单独分离出来处理。 Chang-Jin 2019-11-15
+  state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
   state.pre = originalPreState
   return `_m(${
     state.staticRenderFns.length - 1 // 注意这里传的正是当前静态文本在state.staticRenderFns中的索引 Chang-Jin 2019-11-15
@@ -494,6 +496,8 @@ export function genChildren (
       ? getNormalizationType(children, state.maybeComponent)
       : 0
     const gen = altGenNode || genNode
+
+    // 返回的字符串中对children依次执行getNode，并通过,相连
     return `[${children.map(c => gen(c, state)).join(',')}]${
       normalizationType ? `,${normalizationType}` : ''
     }`
@@ -518,11 +522,16 @@ function getNormalizationType (
     if (el.type !== 1) {
       continue
     }
+
+    // el需要归一化 用来判断级别
+    // el是if块，但块内元素有内容符合上述三个条件的 Chang-Jin 2019-11-18
     if (needsNormalization(el) ||
         (el.ifConditions && el.ifConditions.some(c => needsNormalization(c.block)))) {
       res = 2
       break
     }
+
+    // el是自定义组件或el是if块，但块内元素有自定义组件的 Chang-Jin 2019-11-18
     if (maybeComponent(el) ||
         (el.ifConditions && el.ifConditions.some(c => maybeComponent(c.block)))) {
       res = 1
@@ -531,6 +540,7 @@ function getNormalizationType (
   return res
 }
 
+// el上有`v-for`或标签名是`template`或`slot` Chang-Jin 2019-11-18
 function needsNormalization (el: ASTElement): boolean {
   return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
 }
@@ -593,6 +603,7 @@ function genComponent (
   })`
 }
 
+// 属性的键值用:对应，多个键值对用,隔开 Chang-Jin 2019-11-18
 function genProps (props: Array<ASTAttr>): string {
   let staticProps = ``
   let dynamicProps = ``
@@ -608,6 +619,8 @@ function genProps (props: Array<ASTAttr>): string {
     }
   }
   staticProps = `{${staticProps.slice(0, -1)}}`
+
+  // 如果是动态类型则用_d包裹 Chang-Jin 2019-11-18
   if (dynamicProps) {
     return `_d(${staticProps},[${dynamicProps.slice(0, -1)}])`
   } else {
