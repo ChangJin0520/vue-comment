@@ -33,7 +33,7 @@ export function initRender (vm: Component) {
   // 第二个参数是元素上添加的属性
   // 第三个参数是子元素数组
   // 第四个参数是子元素数组进行归一化处理的级别。
-  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false) // 编译模板生成的render函数执行时调用
   // normalization is always applied for the public version, used in
   // user-written render functions.
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)

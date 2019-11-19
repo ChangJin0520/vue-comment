@@ -1,5 +1,5 @@
 /* @flow */
-
+// VNode的构造函数 Chang-Jin 2019-11-18
 export default class VNode {
   tag: string | void;
   data: VNodeData | void;
@@ -30,13 +30,13 @@ export default class VNode {
   fnScopeId: ?string; // functional scope id support
 
   constructor (
-    tag?: string,
-    data?: VNodeData,
-    children?: ?Array<VNode>,
-    text?: string,
-    elm?: Node,
-    context?: Component,
-    componentOptions?: VNodeComponentOptions,
+    tag?: string, // 标签名
+    data?: VNodeData, // 节点相关数据
+    children?: ?Array<VNode>, // 子节点对象数组
+    text?: string, // 文本内容
+    elm?: Node, // 原生节点元素
+    context?: Component, // 元素所在的Vue实例
+    componentOptions?: VNodeComponentOptions, // 自定义组件上部分组件属性
     asyncFactory?: Function
   ) {
     this.tag = tag
@@ -44,21 +44,21 @@ export default class VNode {
     this.children = children
     this.text = text
     this.elm = elm
-    this.ns = undefined
+    this.ns = undefined // 命名空间
     this.context = context
     this.fnContext = undefined
     this.fnOptions = undefined
     this.fnScopeId = undefined
     this.key = data && data.key
     this.componentOptions = componentOptions
-    this.componentInstance = undefined
-    this.parent = undefined
-    this.raw = false
+    this.componentInstance = undefined // VNode对象如果对应的是一个自定义组件，componentInstance保存相对应的vue实例
+    this.parent = undefined // 当前自定义组件在父组件中的vnode
+    this.raw = false // 是否是静态内容
     this.isStatic = false
     this.isRootInsert = true
     this.isComment = false
-    this.isCloned = false
-    this.isOnce = false
+    this.isCloned = false // 是否是clone的VNode对象
+    this.isOnce = false // 是否是v-once元素的VNode对象
     this.asyncFactory = asyncFactory
     this.asyncMeta = undefined
     this.isAsyncPlaceholder = false

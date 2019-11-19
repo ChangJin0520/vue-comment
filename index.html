@@ -23,7 +23,9 @@
             }
         })
 
-        new Profile().$mount('#mount-point')
+        const vm = new Profile().$mount('#mount-point')
+
+        console.log(vm.$createElement)
     </script>
 </body>
 

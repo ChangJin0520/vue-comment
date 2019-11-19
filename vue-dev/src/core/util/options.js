@@ -439,6 +439,7 @@ export function mergeOptions (
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
  */
+// resolveAsset方法其实就是获取context.$options.components中xxxx所对应的值
 export function resolveAsset (
   options: Object,
   type: string,
@@ -449,20 +450,26 @@ export function resolveAsset (
   if (typeof id !== 'string') {
     return
   }
+
   const assets = options[type]
   // check local registration variations first
   if (hasOwn(assets, id)) return assets[id]
-  const camelizedId = camelize(id)
+
+  const camelizedId = camelize(id) // 驼峰式
   if (hasOwn(assets, camelizedId)) return assets[camelizedId]
-  const PascalCaseId = capitalize(camelizedId)
+
+  const PascalCaseId = capitalize(camelizedId) // Pascal式
   if (hasOwn(assets, PascalCaseId)) return assets[PascalCaseId]
+
   // fallback to prototype chain
   const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
+
   if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
     warn(
       'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
       options
     )
   }
+
   return res
 }
