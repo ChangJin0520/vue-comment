@@ -10,22 +10,30 @@
 </head>
 
 <body>
-    <div id="mount-point"></div>
+    <div id="app">
+        {{ msg }}
+        <tt1 name="chang"></tt1>
+    </div>
     <script type="text/javascript">
-        var Profile = Vue.extend({
-            template: '<p>{{firstName}} {{lastName}} aka {{alias}}</p>',
-            data: function() {
+        new Vue({
+            el: '#app',
+            data() {
                 return {
-                    firstName: 'Walter',
-                    lastName: 'White',
-                    alias: 'Heisenberg'
+                    msg: 'message'
+                }
+            },
+            components: {
+                'tt1': {
+                    template: '<p>tt1{{ name }}</p>',
+                    props: {
+                        name: {
+                            type: String,
+                            default: 'jin'
+                        }
+                    }
                 }
             }
         })
-
-        const vm = new Profile().$mount('#mount-point')
-
-        console.log(vm.$createElement)
     </script>
 </body>
 

@@ -110,6 +110,17 @@ const componentVNodeHooks = {
 // hooksToMerge共有四个值init、prepatch、insert、destroy
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+/**
+ * 生成组件对应的VNode
+ *
+ * @export
+ * @param {(Class<Component> | Function | Object | void)} Ctor 组件的配置项
+ * @param {? VNodeData} data 组件标签上的属性
+ * @param {Component} context 组件所在的vm对象
+ * @param {? Array<VNode>} children 组件内的children 应该就是slot了
+ * @param {string} [tag] 标签名
+ * @returns {(VNode | Array<VNode> | void)} 返回组件对应的VNode对象
+ */
 export function createComponent(
     Ctor: Class<Component> | Function | Object | void,
     data: ? VNodeData,
@@ -125,6 +136,7 @@ export function createComponent(
     const baseCtor = context.$options._base // _base就是Vue
 
     // plain options object: turn it into a constructor
+    // 普通选项对象：将其转换为构造函数
     if (isObject(Ctor)) {
         Ctor = baseCtor.extend(Ctor) // 通过extend得到一个Vue的子类 Chang-Jin 2019-11-19
     }
@@ -139,6 +151,7 @@ export function createComponent(
     }
 
     // async component
+    // 处理异步组件
     let asyncFactory
     if (isUndef(Ctor.cid)) {
         asyncFactory = Ctor
@@ -171,7 +184,7 @@ export function createComponent(
     }
 
     // extract props
-    // 抽取props的数据
+    // 根据子组件定义的props 抽取子组件上传递的数据  如果没有在props上定义 不会抽取
     const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
     // functional component

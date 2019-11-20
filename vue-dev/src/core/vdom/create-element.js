@@ -47,9 +47,11 @@ export function createElement(
         children = data
         data = undefined
     }
+
     if (isTrue(alwaysNormalize)) {
         normalizationType = ALWAYS_NORMALIZE
     }
+
     return _createElement(context, tag, data, children, normalizationType)
 }
 
@@ -60,6 +62,7 @@ export function _createElement(
     children ?: any,
     normalizationType ?: number
 ): VNode | Array<VNode> {
+    // 数据已被Oberser
     if (isDef(data) && isDef((data: any).__ob__)) {
         process.env.NODE_ENV !== 'production' && warn(
             `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -69,6 +72,7 @@ export function _createElement(
         return createEmptyVNode()
     }
     // object syntax in v-bind
+    // is语法用在component上 Chang-Jin 2019-11-19
     if (isDef(data) && isDef(data.is)) {
         tag = data.is
     }
@@ -78,6 +82,7 @@ export function _createElement(
         // in case of component :is set to falsy value
         return createEmptyVNode()
     }
+
     // warn against non-primitive key
     if (process.env.NODE_ENV !== 'production' &&
         isDef(data) && isDef(data.key) && !isPrimitive(data.key)
@@ -90,6 +95,7 @@ export function _createElement(
             )
         }
     }
+
     // support single function children as default scoped slot
     // 子元素第一个参数为函数，则作为默认的slot Chang-Jin 2019-11-18
     if (Array.isArray(children) &&
@@ -128,7 +134,7 @@ export function _createElement(
                 undefined, undefined, context
             )
 
-        // tag是字符串又定义了组件 Chang-Jin 2019-11-18
+        // tag是自定义组件 Chang-Jin 2019-11-18
         } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
             // component
             vnode = createComponent(Ctor, data, context, children, tag)
