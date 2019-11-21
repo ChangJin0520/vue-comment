@@ -492,93 +492,98 @@ function renderAttr (key, value) {
 }
 
 /*  */
-
-var VNode = function VNode (
-  tag,
-  data,
-  children,
-  text,
-  elm,
-  context,
-  componentOptions,
-  asyncFactory
+// VNode的构造函数 Chang-Jin 2019-11-18
+var VNode = function VNode(
+    tag ,
+    data ,
+    children  ,
+    text ,
+    elm ,
+    context ,
+    componentOptions ,
+    asyncFactory 
 ) {
-  this.tag = tag;
-  this.data = data;
-  this.children = children;
-  this.text = text;
-  this.elm = elm;
-  this.ns = undefined;
-  this.context = context;
-  this.fnContext = undefined;
-  this.fnOptions = undefined;
-  this.fnScopeId = undefined;
-  this.key = data && data.key;
-  this.componentOptions = componentOptions;
-  this.componentInstance = undefined;
-  this.parent = undefined;
-  this.raw = false;
-  this.isStatic = false;
-  this.isRootInsert = true;
-  this.isComment = false;
-  this.isCloned = false;
-  this.isOnce = false;
-  this.asyncFactory = asyncFactory;
-  this.asyncMeta = undefined;
-  this.isAsyncPlaceholder = false;
+    this.tag = tag; // 标签名
+    this.data = data; // 结点相关属性数据
+    this.children = children; // 子节点
+    this.text = text; // 文本
+    this.elm = elm; // dom元素
+    this.ns = undefined; // 命名空间
+    this.context = context; // VNode所处Vue对象
+    this.fnContext = undefined;
+    this.fnOptions = undefined;
+    this.fnScopeId = undefined;
+    this.key = data && data.key;
+    this.componentOptions = componentOptions; // VNode对象如果对应的是一个自定义组件，componentOptions保存组件相关事件、props数据等
+    this.componentInstance = undefined; // VNode对象如果对应的是一个自定义组件，componentInstance保存相对应的vue实例
+    this.parent = undefined; // 当前自定义组件在父组件中的vnode
+    this.raw = false; // 包含原始HTML
+    this.isStatic = false; // 是否是静态内容
+    this.isRootInsert = true;
+    this.isComment = false; // 空注释占位符
+    this.isCloned = false; // 是否是clone的VNode对象
+    this.isOnce = false; // 是否是v-once元素的VNode对象
+    this.asyncFactory = asyncFactory;
+    this.asyncMeta = undefined;
+    this.isAsyncPlaceholder = false;
 };
 
 var prototypeAccessors = { child: { configurable: true } };
 
 // DEPRECATED: alias for componentInstance for backwards compat.
+// 不推荐使用：向后兼容的componentInstance的别名。
 /* istanbul ignore next */
 prototypeAccessors.child.get = function () {
-  return this.componentInstance
+    return this.componentInstance
 };
 
 Object.defineProperties( VNode.prototype, prototypeAccessors );
 
 var createEmptyVNode = function (text) {
-  if ( text === void 0 ) text = '';
+    if ( text === void 0 ) text = '';
 
-  var node = new VNode();
-  node.text = text;
-  node.isComment = true;
-  return node
+    var node = new VNode();
+    node.text = text;
+    node.isComment = true;
+    return node
 };
 
-function createTextVNode (val) {
-  return new VNode(undefined, undefined, undefined, String(val))
+function createTextVNode(val) {
+    return new VNode(undefined, undefined, undefined, String(val))
 }
 
 // optimized shallow clone
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
-function cloneVNode (vnode) {
-  var cloned = new VNode(
-    vnode.tag,
-    vnode.data,
-    // #7975
-    // clone children array to avoid mutating original in case of cloning
-    // a child.
-    vnode.children && vnode.children.slice(),
-    vnode.text,
-    vnode.elm,
-    vnode.context,
-    vnode.componentOptions,
-    vnode.asyncFactory
-  );
-  cloned.ns = vnode.ns;
-  cloned.isStatic = vnode.isStatic;
-  cloned.key = vnode.key;
-  cloned.isComment = vnode.isComment;
-  cloned.fnContext = vnode.fnContext;
-  cloned.fnOptions = vnode.fnOptions;
-  cloned.fnScopeId = vnode.fnScopeId;
-  cloned.asyncMeta = vnode.asyncMeta;
-  cloned.isCloned = true;
-  return cloned
+// 优化的浅克隆
+// 用于静态节点和插槽节点，
+// 因为它们可以在多个渲染中重复使用，
+// 克隆它们可以避免在DOM操作依赖于它们的elm参考时出错。
+function cloneVNode(vnode) {
+    var cloned = new VNode(
+        vnode.tag,
+        vnode.data,
+        // #7975
+        // clone children array to avoid mutating original in case of cloning
+        // a child.
+        vnode.children && vnode.children.slice(),
+        vnode.text,
+        vnode.elm,
+        vnode.context,
+        vnode.componentOptions,
+        vnode.asyncFactory
+    );
+    cloned.ns = vnode.ns;
+    cloned.isStatic = vnode.isStatic;
+    cloned.key = vnode.key;
+    cloned.isComment = vnode.isComment;
+    cloned.fnContext = vnode.fnContext;
+    cloned.fnOptions = vnode.fnOptions;
+    cloned.fnScopeId = vnode.fnScopeId;
+    cloned.asyncMeta = vnode.asyncMeta;
+    cloned.isCloned = true;
+    return cloned
 }
 
 /*  */
@@ -1283,145 +1288,142 @@ var strats = config.optionMergeStrategies;
  * Options with restrictions
  */
 {
-  strats.el = strats.propsData = function (parent, child, vm, key) {
-    if (!vm) {
-      warn(
-        "option \"" + key + "\" can only be used during instance " +
-        'creation with the `new` keyword.'
-      );
-    }
-    return defaultStrat(parent, child)
-  };
+    strats.el = strats.propsData = function(parent, child, vm, key) {
+        if (!vm) {
+            warn(
+                "option \"" + key + "\" can only be used during instance " +
+                'creation with the `new` keyword.'
+            );
+        }
+        return defaultStrat(parent, child)
+    };
 }
 
 /**
  * Helper that recursively merges two data objects together.
  */
-function mergeData (to, from) {
-  if (!from) { return to }
-  var key, toVal, fromVal;
+function mergeData(to, from) {
+    if (!from) { return to }
+    var key, toVal, fromVal;
 
-  var keys = hasSymbol
-    ? Reflect.ownKeys(from)
-    : Object.keys(from);
+    var keys = hasSymbol ?
+        Reflect.ownKeys(from) :
+        Object.keys(from);
 
-  for (var i = 0; i < keys.length; i++) {
-    key = keys[i];
-    // in case the object is already observed...
-    if (key === '__ob__') { continue }
-    toVal = to[key];
-    fromVal = from[key];
-    if (!hasOwn(to, key)) {
-      set(to, key, fromVal);
-    } else if (
-      toVal !== fromVal &&
-      isPlainObject(toVal) &&
-      isPlainObject(fromVal)
-    ) {
-      mergeData(toVal, fromVal);
+    for (var i = 0; i < keys.length; i++) {
+        key = keys[i];
+        // in case the object is already observed...
+        if (key === '__ob__') { continue }
+        toVal = to[key];
+        fromVal = from[key];
+        if (!hasOwn(to, key)) {
+            set(to, key, fromVal);
+        } else if (
+            toVal !== fromVal &&
+            isPlainObject(toVal) &&
+            isPlainObject(fromVal)
+        ) {
+            mergeData(toVal, fromVal);
+        }
     }
-  }
-  return to
+    return to
 }
 
 /**
  * Data
  */
-function mergeDataOrFn (
-  parentVal,
-  childVal,
-  vm
+function mergeDataOrFn(
+    parentVal,
+    childVal,
+    vm 
 ) {
-  if (!vm) {
-    // in a Vue.extend merge, both should be functions
-    if (!childVal) {
-      return parentVal
+    if (!vm) {
+        // in a Vue.extend merge, both should be functions
+        if (!childVal) {
+            return parentVal
+        }
+        if (!parentVal) {
+            return childVal
+        }
+        // when parentVal & childVal are both present,
+        // we need to return a function that returns the
+        // merged result of both functions... no need to
+        // check if parentVal is a function here because
+        // it has to be a function to pass previous merges.
+        return function mergedDataFn() {
+            return mergeData(
+                typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+                typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
+            )
+        }
+    } else {
+        return function mergedInstanceDataFn() {
+            // instance merge
+            var instanceData = typeof childVal === 'function' ?
+                childVal.call(vm, vm) :
+                childVal;
+            var defaultData = typeof parentVal === 'function' ?
+                parentVal.call(vm, vm) :
+                parentVal;
+            if (instanceData) {
+                return mergeData(instanceData, defaultData)
+            } else {
+                return defaultData
+            }
+        }
     }
-    if (!parentVal) {
-      return childVal
-    }
-    // when parentVal & childVal are both present,
-    // we need to return a function that returns the
-    // merged result of both functions... no need to
-    // check if parentVal is a function here because
-    // it has to be a function to pass previous merges.
-    return function mergedDataFn () {
-      return mergeData(
-        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
-        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
-      )
-    }
-  } else {
-    return function mergedInstanceDataFn () {
-      // instance merge
-      var instanceData = typeof childVal === 'function'
-        ? childVal.call(vm, vm)
-        : childVal;
-      var defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm, vm)
-        : parentVal;
-      if (instanceData) {
-        return mergeData(instanceData, defaultData)
-      } else {
-        return defaultData
-      }
-    }
-  }
 }
 
-strats.data = function (
-  parentVal,
-  childVal,
-  vm
+strats.data = function(
+    parentVal,
+    childVal,
+    vm 
 ) {
-  if (!vm) {
-    if (childVal && typeof childVal !== 'function') {
-       warn(
-        'The "data" option should be a function ' +
-        'that returns a per-instance value in component ' +
-        'definitions.',
-        vm
-      );
+    if (!vm) {
+        if (childVal && typeof childVal !== 'function') {
+             warn(
+                'The "data" option should be a function ' +
+                'that returns a per-instance value in component ' +
+                'definitions.',
+                vm
+            );
 
-      return parentVal
+            return parentVal
+        }
+        return mergeDataOrFn(parentVal, childVal)
     }
-    return mergeDataOrFn(parentVal, childVal)
-  }
 
-  return mergeDataOrFn(parentVal, childVal, vm)
+    return mergeDataOrFn(parentVal, childVal, vm)
 };
 
 /**
  * Hooks and props are merged as arrays.
  */
-function mergeHook (
-  parentVal,
-  childVal
+function mergeHook(
+    parentVal ,
+    childVal
 ) {
-  var res = childVal
-    ? parentVal
-      ? parentVal.concat(childVal)
-      : Array.isArray(childVal)
-        ? childVal
-        : [childVal]
-    : parentVal;
-  return res
-    ? dedupeHooks(res)
-    : res
+    var res = childVal ?
+        parentVal ?
+        parentVal.concat(childVal) :
+        Array.isArray(childVal) ?
+        childVal : [childVal] : parentVal;
+    return res ?
+        dedupeHooks(res) : res
 }
 
-function dedupeHooks (hooks) {
-  var res = [];
-  for (var i = 0; i < hooks.length; i++) {
-    if (res.indexOf(hooks[i]) === -1) {
-      res.push(hooks[i]);
+function dedupeHooks(hooks) {
+    var res = [];
+    for (var i = 0; i < hooks.length; i++) {
+        if (res.indexOf(hooks[i]) === -1) {
+            res.push(hooks[i]);
+        }
     }
-  }
-  return res
+    return res
 }
 
 LIFECYCLE_HOOKS.forEach(function (hook) {
-  strats[hook] = mergeHook;
+    strats[hook] = mergeHook;
 });
 
 /**
@@ -1431,23 +1433,23 @@ LIFECYCLE_HOOKS.forEach(function (hook) {
  * a three-way merge between constructor options, instance
  * options and parent options.
  */
-function mergeAssets (
-  parentVal,
-  childVal,
-  vm,
-  key
+function mergeAssets(
+    parentVal,
+    childVal,
+    vm ,
+    key
 ) {
-  var res = Object.create(parentVal || null);
-  if (childVal) {
-     assertObjectType(key, childVal, vm);
-    return extend(res, childVal)
-  } else {
-    return res
-  }
+    var res = Object.create(parentVal || null);
+    if (childVal) {
+         assertObjectType(key, childVal, vm);
+        return extend(res, childVal)
+    } else {
+        return res
+    }
 }
 
-ASSET_TYPES.forEach(function (type) {
-  strats[type + 's'] = mergeAssets;
+ASSET_TYPES.forEach(function(type) {
+    strats[type + 's'] = mergeAssets;
 });
 
 /**
@@ -1456,233 +1458,245 @@ ASSET_TYPES.forEach(function (type) {
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
-strats.watch = function (
-  parentVal,
-  childVal,
-  vm,
-  key
+strats.watch = function(
+    parentVal,
+    childVal,
+    vm ,
+    key
 ) {
-  // work around Firefox's Object.prototype.watch...
-  if (parentVal === nativeWatch) { parentVal = undefined; }
-  if (childVal === nativeWatch) { childVal = undefined; }
-  /* istanbul ignore if */
-  if (!childVal) { return Object.create(parentVal || null) }
-  {
-    assertObjectType(key, childVal, vm);
-  }
-  if (!parentVal) { return childVal }
-  var ret = {};
-  extend(ret, parentVal);
-  for (var key$1 in childVal) {
-    var parent = ret[key$1];
-    var child = childVal[key$1];
-    if (parent && !Array.isArray(parent)) {
-      parent = [parent];
+    // work around Firefox's Object.prototype.watch...
+    if (parentVal === nativeWatch) { parentVal = undefined; }
+    if (childVal === nativeWatch) { childVal = undefined; }
+    /* istanbul ignore if */
+    if (!childVal) { return Object.create(parentVal || null) }
+    {
+        assertObjectType(key, childVal, vm);
     }
-    ret[key$1] = parent
-      ? parent.concat(child)
-      : Array.isArray(child) ? child : [child];
-  }
-  return ret
+    if (!parentVal) { return childVal }
+    var ret = {};
+    extend(ret, parentVal);
+    for (var key$1 in childVal) {
+        var parent = ret[key$1];
+        var child = childVal[key$1];
+        if (parent && !Array.isArray(parent)) {
+            parent = [parent];
+        }
+        ret[key$1] = parent ?
+            parent.concat(child) :
+            Array.isArray(child) ? child : [child];
+    }
+    return ret
 };
 
 /**
  * Other object hashes.
  */
 strats.props =
-strats.methods =
-strats.inject =
-strats.computed = function (
-  parentVal,
-  childVal,
-  vm,
-  key
-) {
-  if (childVal && "development" !== 'production') {
-    assertObjectType(key, childVal, vm);
-  }
-  if (!parentVal) { return childVal }
-  var ret = Object.create(null);
-  extend(ret, parentVal);
-  if (childVal) { extend(ret, childVal); }
-  return ret
-};
+    strats.methods =
+    strats.inject =
+    strats.computed = function(
+        parentVal,
+        childVal,
+        vm ,
+        key
+    ) {
+        if (childVal && "development" !== 'production') {
+            assertObjectType(key, childVal, vm);
+        }
+        if (!parentVal) { return childVal }
+        var ret = Object.create(null);
+        extend(ret, parentVal);
+        if (childVal) { extend(ret, childVal); }
+        return ret
+    };
 strats.provide = mergeDataOrFn;
 
 /**
  * Default strategy.
  */
-var defaultStrat = function (parentVal, childVal) {
-  return childVal === undefined
-    ? parentVal
-    : childVal
+var defaultStrat = function(parentVal, childVal) {
+    return childVal === undefined ?
+        parentVal :
+        childVal
 };
 
 /**
  * Validate component names
  */
-function checkComponents (options) {
-  for (var key in options.components) {
-    validateComponentName(key);
-  }
+function checkComponents(options) {
+    for (var key in options.components) {
+        validateComponentName(key);
+    }
 }
 
-function validateComponentName (name) {
-  if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) {
-    warn(
-      'Invalid component name: "' + name + '". Component names ' +
-      'should conform to valid custom element name in html5 specification.'
-    );
-  }
-  if (isBuiltInTag(name) || config.isReservedTag(name)) {
-    warn(
-      'Do not use built-in or reserved HTML elements as component ' +
-      'id: ' + name
-    );
-  }
+function validateComponentName(name) {
+    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) {
+        warn(
+            'Invalid component name: "' + name + '". Component names ' +
+            'should conform to valid custom element name in html5 specification.'
+        );
+    }
+    if (isBuiltInTag(name) || config.isReservedTag(name)) {
+        warn(
+            'Do not use built-in or reserved HTML elements as component ' +
+            'id: ' + name
+        );
+    }
 }
 
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
-function normalizeProps (options, vm) {
-  var props = options.props;
-  if (!props) { return }
-  var res = {};
-  var i, val, name;
-  if (Array.isArray(props)) {
-    i = props.length;
-    while (i--) {
-      val = props[i];
-      if (typeof val === 'string') {
-        name = camelize(val);
-        res[name] = { type: null };
-      } else {
-        warn('props must be strings when using array syntax.');
-      }
+function normalizeProps(options, vm) {
+    var props = options.props;
+    if (!props) { return }
+    var res = {};
+    var i, val, name;
+    if (Array.isArray(props)) {
+        i = props.length;
+        while (i--) {
+            val = props[i];
+            if (typeof val === 'string') {
+                name = camelize(val);
+                res[name] = {
+                    type: null
+                };
+            } else {
+                warn('props must be strings when using array syntax.');
+            }
+        }
+    } else if (isPlainObject(props)) {
+        for (var key in props) {
+            val = props[key];
+            name = camelize(key);
+            res[name] = isPlainObject(val) ?
+                val : {
+                    type: val
+                };
+        }
+    } else {
+        warn(
+            "Invalid value for option \"props\": expected an Array or an Object, " +
+            "but got " + (toRawType(props)) + ".",
+            vm
+        );
     }
-  } else if (isPlainObject(props)) {
-    for (var key in props) {
-      val = props[key];
-      name = camelize(key);
-      res[name] = isPlainObject(val)
-        ? val
-        : { type: val };
-    }
-  } else {
-    warn(
-      "Invalid value for option \"props\": expected an Array or an Object, " +
-      "but got " + (toRawType(props)) + ".",
-      vm
-    );
-  }
-  options.props = res;
+    options.props = res;
 }
 
 /**
  * Normalize all injections into Object-based format
  */
-function normalizeInject (options, vm) {
-  var inject = options.inject;
-  if (!inject) { return }
-  var normalized = options.inject = {};
-  if (Array.isArray(inject)) {
-    for (var i = 0; i < inject.length; i++) {
-      normalized[inject[i]] = { from: inject[i] };
+function normalizeInject(options, vm) {
+    var inject = options.inject;
+    if (!inject) { return }
+    var normalized = options.inject = {};
+    if (Array.isArray(inject)) {
+        for (var i = 0; i < inject.length; i++) {
+            normalized[inject[i]] = {
+                from: inject[i]
+            };
+        }
+    } else if (isPlainObject(inject)) {
+        for (var key in inject) {
+            var val = inject[key];
+            normalized[key] = isPlainObject(val) ?
+                extend({
+                    from: key
+                }, val) : {
+                    from: val
+                };
+        }
+    } else {
+        warn(
+            "Invalid value for option \"inject\": expected an Array or an Object, " +
+            "but got " + (toRawType(inject)) + ".",
+            vm
+        );
     }
-  } else if (isPlainObject(inject)) {
-    for (var key in inject) {
-      var val = inject[key];
-      normalized[key] = isPlainObject(val)
-        ? extend({ from: key }, val)
-        : { from: val };
-    }
-  } else {
-    warn(
-      "Invalid value for option \"inject\": expected an Array or an Object, " +
-      "but got " + (toRawType(inject)) + ".",
-      vm
-    );
-  }
 }
 
 /**
  * Normalize raw function directives into object format.
  */
-function normalizeDirectives (options) {
-  var dirs = options.directives;
-  if (dirs) {
-    for (var key in dirs) {
-      var def = dirs[key];
-      if (typeof def === 'function') {
-        dirs[key] = { bind: def, update: def };
-      }
+function normalizeDirectives(options) {
+    var dirs = options.directives;
+    if (dirs) {
+        for (var key in dirs) {
+            var def = dirs[key];
+            if (typeof def === 'function') {
+                dirs[key] = {
+                    bind: def,
+                    update: def
+                };
+            }
+        }
     }
-  }
 }
 
-function assertObjectType (name, value, vm) {
-  if (!isPlainObject(value)) {
-    warn(
-      "Invalid value for option \"" + name + "\": expected an Object, " +
-      "but got " + (toRawType(value)) + ".",
-      vm
-    );
-  }
+function assertObjectType(name, value, vm) {
+    if (!isPlainObject(value)) {
+        warn(
+            "Invalid value for option \"" + name + "\": expected an Object, " +
+            "but got " + (toRawType(value)) + ".",
+            vm
+        );
+    }
 }
 
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
-function mergeOptions (
-  parent,
-  child,
-  vm
+function mergeOptions(
+    parent,
+    child,
+    vm 
 ) {
-  {
-    checkComponents(child);
-  }
-
-  if (typeof child === 'function') {
-    child = child.options;
-  }
-
-  normalizeProps(child, vm);
-  normalizeInject(child, vm);
-  normalizeDirectives(child);
-
-  // Apply extends and mixins on the child options,
-  // but only if it is a raw options object that isn't
-  // the result of another mergeOptions call.
-  // Only merged options has the _base property.
-  if (!child._base) {
-    if (child.extends) {
-      parent = mergeOptions(parent, child.extends, vm);
+    {
+        checkComponents(child);
     }
-    if (child.mixins) {
-      for (var i = 0, l = child.mixins.length; i < l; i++) {
-        parent = mergeOptions(parent, child.mixins[i], vm);
-      }
-    }
-  }
 
-  var options = {};
-  var key;
-  for (key in parent) {
-    mergeField(key);
-  }
-  for (key in child) {
-    if (!hasOwn(parent, key)) {
-      mergeField(key);
+    if (typeof child === 'function') {
+        child = child.options;
     }
-  }
-  function mergeField (key) {
-    var strat = strats[key] || defaultStrat;
-    options[key] = strat(parent[key], child[key], vm, key);
-  }
-  return options
+
+    normalizeProps(child, vm);
+    normalizeInject(child, vm);
+    normalizeDirectives(child);
+
+    // Apply extends and mixins on the child options,
+    // but only if it is a raw options object that isn't
+    // the result of another mergeOptions call.
+    // Only merged options has the _base property.
+    if (!child._base) {
+        if (child.extends) {
+            parent = mergeOptions(parent, child.extends, vm);
+        }
+        if (child.mixins) {
+            for (var i = 0, l = child.mixins.length; i < l; i++) {
+                parent = mergeOptions(parent, child.mixins[i], vm);
+            }
+        }
+    }
+
+    var options = {};
+    var key;
+    for (key in parent) {
+        mergeField(key);
+    }
+    for (key in child) {
+        if (!hasOwn(parent, key)) {
+            mergeField(key);
+        }
+    }
+
+    function mergeField(key) {
+        var strat = strats[key] || defaultStrat;
+        options[key] = strat(parent[key], child[key], vm, key);
+    }
+    return options
 }
 
 /**
@@ -1690,32 +1704,39 @@ function mergeOptions (
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
  */
-function resolveAsset (
-  options,
-  type,
-  id,
-  warnMissing
+// resolveAsset方法其实就是获取context.$options.components中xxxx所对应的值
+function resolveAsset(
+    options,
+    type,
+    id,
+    warnMissing 
 ) {
-  /* istanbul ignore if */
-  if (typeof id !== 'string') {
-    return
-  }
-  var assets = options[type];
-  // check local registration variations first
-  if (hasOwn(assets, id)) { return assets[id] }
-  var camelizedId = camelize(id);
-  if (hasOwn(assets, camelizedId)) { return assets[camelizedId] }
-  var PascalCaseId = capitalize(camelizedId);
-  if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
-  // fallback to prototype chain
-  var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
-  if ( warnMissing && !res) {
-    warn(
-      'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
-      options
-    );
-  }
-  return res
+    /* istanbul ignore if */
+    if (typeof id !== 'string') {
+        return
+    }
+
+    var assets = options[type];
+    // check local registration variations first
+    if (hasOwn(assets, id)) { return assets[id] }
+
+    var camelizedId = camelize(id); // 驼峰式
+    if (hasOwn(assets, camelizedId)) { return assets[camelizedId] }
+
+    var PascalCaseId = capitalize(camelizedId); // Pascal式
+    if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
+
+    // fallback to prototype chain
+    var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
+
+    if ( warnMissing && !res) {
+        warn(
+            'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
+            options
+        );
+    }
+
+    return res
 }
 
 /*  */
@@ -2616,7 +2637,7 @@ function normalizeAsync (cache, method) {
 
 /*  */
 
-var validDivisionCharRE = /[\w).+\-_$\]]/;
+var validDivisionCharRE = /[\w).+\-_$\]]/; // 判断表达式是不是正则 Chang-Jin 2019-11-13
 
 // 过滤器解析会在 解析 文本和属性的时候用到 Chang-Jin 2019-11-07
 function parseFilters (exp) {
@@ -2719,8 +2740,8 @@ function wrapFilter (exp, filter) {
 
 /*  */
 
-var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
-var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
+var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g; // 默认模板分割符匹配 Chang-Jin 2019-11-13
+var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g; // 匹配需要转义的字符 Chang-Jin 2019-11-13
 
 var buildRegex = cached(function (delimiters) {
   var open = delimiters[0].replace(regexEscapeRE, '\\$&');
@@ -3096,13 +3117,23 @@ var style = {
 
 // Regular Expressions for parsing tags and attributes
 var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/; // 匹配动态特性 Chang-Jin 2019-11-07
+
+// 匹配其实标签名 Chang-Jin 2019-11-13
 var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z" + (unicodeRegExp.source) + "]*";
 var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
 var startTagOpen = new RegExp(("^<" + qnameCapture));
+
+// 匹配起始标签的结束部分 做了一个单标签区分/ Chang-Jin 2019-11-13
 var startTagClose = /^\s*(\/?)>/;
+
+// 匹配双标签的结束标签 Chang-Jin 2019-11-13
 var endTag = new RegExp(("^<\\/" + qnameCapture + "[^>]*>"));
+
+// 文档声明 Chang-Jin 2019-11-13
 var doctype = /^<!DOCTYPE [^>]+>/i;
+
+// html注释 Chang-Jin 2019-11-13
 // #7298: escape - to avoid being passed as HTML comment when inlined in page
 var comment = /^<!\--/;
 var conditionalComment = /^<!\[/;
@@ -3139,12 +3170,16 @@ function parseHTML (html, options) {
   var canBeLeftOpenTag = options.canBeLeftOpenTag || no;
   var index = 0;
   var last, lastTag;
+
+  // html为模板 Chang-Jin 2019-11-13
   while (html) {
-    last = html;
+    last = html; // last保存还没解析的模板部分 Chang-Jin 2019-11-13
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       var textEnd = html.indexOf('<');
       if (textEnd === 0) {
+
+        // 过滤注释 Chang-Jin 2019-11-13
         // Comment:
         if (comment.test(html)) {
           var commentEnd = html.indexOf('-->');
@@ -3158,6 +3193,7 @@ function parseHTML (html, options) {
           }
         }
 
+        // 过滤html注释 Chang-Jin 2019-11-13
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (conditionalComment.test(html)) {
           var conditionalEnd = html.indexOf(']>');
@@ -3168,6 +3204,7 @@ function parseHTML (html, options) {
           }
         }
 
+        // 过滤doctype Chang-Jin 2019-11-13
         // Doctype:
         var doctypeMatch = html.match(doctype);
         if (doctypeMatch) {
@@ -3175,6 +3212,7 @@ function parseHTML (html, options) {
           continue
         }
 
+        // 匹配结束标签 Chang-Jin 2019-11-13
         // End tag:
         var endTagMatch = html.match(endTag);
         if (endTagMatch) {
@@ -3260,12 +3298,14 @@ function parseHTML (html, options) {
   // Clean up any remaining tags
   parseEndTag();
 
+  // 把html从n位截取 并记录索引index的位置 Chang-Jin 2019-11-13
   function advance (n) {
     index += n;
     html = html.substring(n);
   }
 
   function parseStartTag () {
+    // 匹配标签名 Chang-Jin 2019-11-07
     var start = html.match(startTagOpen);
     if (start) {
       var match = {
@@ -3275,14 +3315,18 @@ function parseHTML (html, options) {
       };
       advance(start[0].length);
       var end, attr;
+
+      // startTagClose是匹配标签的 /> 或 > dynamicArgAttribute是匹配动态属性 attribute 是匹配属性 Chang-Jin 2019-11-07
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index;
         advance(attr[0].length);
         attr.end = index;
         match.attrs.push(attr);
       }
+
+      // 如果匹配到开始标签的> 则根据是否匹配到/来判断是否是单标签 Chang-Jin 2019-11-07
       if (end) {
-        match.unarySlash = end[1];
+        match.unarySlash = end[1]; // 匹配到的/
         advance(end[0].length);
         match.end = index;
         return match
@@ -3290,14 +3334,18 @@ function parseHTML (html, options) {
     }
   }
 
+  // 对匹配到的开始标签 进一步加工 Chang-Jin 2019-11-13
   function handleStartTag (match) {
     var tagName = match.tagName;
     var unarySlash = match.unarySlash;
 
     if (expectHTML) {
+        // p标签中插入nonPhrasingTag p标签会在插入标签前自动闭合 Chang-Jin 2019-11-08
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag);
       }
+
+      // 能够不闭合的标签?
       if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
         parseEndTag(tagName);
       }
@@ -3309,14 +3357,17 @@ function parseHTML (html, options) {
     var attrs = new Array(l);
     for (var i = 0; i < l; i++) {
       var args = match.attrs[i];
+      // args[3]是匹配到""包含的属性值 args[4]是匹配到''包含的属性值 args[5]是无引号包含的属性值 Chang-Jin 2019-11-07
       var value = args[3] || args[4] || args[5] || '';
       var shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
         ? options.shouldDecodeNewlinesForHref
         : options.shouldDecodeNewlines;
       attrs[i] = {
         name: args[1],
-        value: decodeAttr(value, shouldDecodeNewlines)
+        value: decodeAttr(value, shouldDecodeNewlines) //这里会对属性的值进行解码 防止IE上出BUG
       };
+
+      // 不是开发环境下需要属性的start和end值
       if ( options.outputSourceRange) {
         attrs[i].start = args.start + args[0].match(/^\s*/).length;
         attrs[i].end = args.end;
@@ -3369,7 +3420,7 @@ function parseHTML (html, options) {
       }
 
       // Remove the open elements from the stack
-      stack.length = pos;
+      stack.length = pos; // 修改数组长度实现出栈 Chang-Jin 2019-11-08
       lastTag = pos && stack[pos - 1].tag;
     } else if (lowerCasedTagName === 'br') {
       if (options.start) {
@@ -3536,16 +3587,16 @@ function parseString (chr) {
 
 /*  */
 
-var onRE = /^@|^v-on:/;
+var onRE = /^@|^v-on:/; // 匹配添加事件的语法 Chang-Jin 2019-11-13
 var dirRE =  /^v-|^@|^:|^#/;
-var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
-var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/; // 匹配v-for中的属性 如item in items、(item, index) of items Chang-Jin 2019-11-13
+var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/; // 对forAliasRE中第一个捕获内容的拆解 in | of 前的部分 Chang-Jin 2019-11-13
 var stripParensRE = /^\(|\)$/g;
 var dynamicArgRE = /^\[.*\]$/;
 
-var argRE = /:(.*)$/;
-var bindRE = /^:|^\.|^v-bind:/;
-var modifierRE = /\.[^.\]]+(?=[^\]]*$)/g;
+var argRE = /:(.*)$/; // :开头的属性 Chang-Jin 2019-11-13
+var bindRE = /^:|^\.|^v-bind:/; // 匹配:或v-bind开头的属性 Chang-Jin 2019-11-13
+var modifierRE = /\.[^.\]]+(?=[^\]]*$)/g; // 匹配事件指令的修饰符 Chang-Jin 2019-11-13
 
 var slotRE = /^v-slot(:|$)|^#/;
 
@@ -3594,9 +3645,9 @@ function parse (
 ) {
   warn$1 = options.warn || baseWarn;
 
-  platformIsPreTag = options.isPreTag || no;
-  platformMustUseProp = options.mustUseProp || no;
-  platformGetTagNamespace = options.getTagNamespace || no;
+  platformIsPreTag = options.isPreTag || no; // 是不是pre标签 Chang-Jin 2019-11-13
+  platformMustUseProp = options.mustUseProp || no; // 是否需要通过绑定prop来绑定属性 Chang-Jin 2019-11-13
+  platformGetTagNamespace = options.getTagNamespace || no; // 获取tag的命名空间 svg或math Chang-Jin 2019-11-13
   var isReservedTag = options.isReservedTag || no;
   maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
 
@@ -3604,7 +3655,7 @@ function parse (
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
 
-  delimiters = options.delimiters;
+  delimiters = options.delimiters; // 自定义模板字符
 
   var stack = [];
   var preserveWhitespace = options.preserveWhitespace !== false;
@@ -3658,6 +3709,8 @@ function parse (
           var name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element;
         }
+
+        // 标签父子关系 Chang-Jin 2019-11-13
         currentParent.children.push(element);
         element.parent = currentParent;
       }
@@ -3676,6 +3729,8 @@ function parse (
     if (platformIsPreTag(element.tag)) {
       inPre = false;
     }
+
+    // 后处理 Chang-Jin 2019-11-13
     // apply post-transforms
     for (var i = 0; i < postTransforms.length; i++) {
       postTransforms[i](element, options);
@@ -3733,12 +3788,14 @@ function parse (
         attrs = guardIESVGBug(attrs);
       }
 
+      // 定义基本的ast结构 Chang-Jin 2019-11-13
       var element = createASTElement(tag, attrs, currentParent);
       if (ns) {
         element.ns = ns;
       }
 
       {
+        // 非生产环境 报错什么的需要提示位置
         if (options.outputSourceRange) {
           element.start = start$1;
           element.end = end;
@@ -3747,6 +3804,8 @@ function parse (
             return cumulated
           }, {});
         }
+
+        // 检查属性值
         attrs.forEach(function (attr) {
           if (invalidAttributeRE.test(attr.name)) {
             warn$1(
@@ -3761,6 +3820,7 @@ function parse (
         });
       }
 
+      // 检查标签
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true;
          warn$1(
@@ -3771,12 +3831,14 @@ function parse (
         );
       }
 
+      // 对ast进行预处理 Chang-Jin 2019-11-13
       // apply pre-transforms
       for (var i = 0; i < preTransforms.length; i++) {
         element = preTransforms[i](element, options) || element;
       }
 
       if (!inVPre) {
+        // 解析v-pre指令 Chang-Jin 2019-11-13
         processPre(element);
         if (element.pre) {
           inVPre = true;
@@ -3788,6 +3850,7 @@ function parse (
       if (inVPre) {
         processRawAttrs(element);
       } else if (!element.processed) {
+        // 解析v-if v-for v-once指令 Chang-Jin 2019-11-13
         // structural directives
         processFor(element);
         processIf(element);
@@ -3811,6 +3874,7 @@ function parse (
 
     end: function end (tag, start, end$1) {
       var element = stack[stack.length - 1];
+      // 出栈 Chang-Jin 2019-11-13
       // pop stack
       stack.length -= 1;
       currentParent = stack[stack.length - 1];
@@ -3948,6 +4012,7 @@ function processElement (
   element,
   options
 ) {
+  // 解析key指令 Chang-Jin 2019-11-13
   processKey(element);
 
   // determine whether this is a plain element after
@@ -3958,13 +4023,17 @@ function processElement (
     !element.attrsList.length
   );
 
+  // 解析ref slot component指令 Chang-Jin 2019-11-13
   processRef(element);
   processSlotContent(element);
   processSlotOutlet(element);
   processComponent(element);
+
+  // 对ast处理 Chang-Jin 2019-11-13
   for (var i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element;
   }
+
   processAttrs(element);
   return element
 }
@@ -4278,6 +4347,8 @@ function processAttrs (el) {
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name;
     value = list[i].value;
+
+    // 判断是否为指令
     if (dirRE.test(name)) {
       // mark element as dynamic
       el.hasBindings = true;
@@ -4287,6 +4358,8 @@ function processAttrs (el) {
       if (modifiers) {
         name = name.replace(modifierRE, '');
       }
+
+      // 解析v-bind属性 Chang-Jin 2019-11-13
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '');
         value = parseFilters(value);
@@ -4355,6 +4428,8 @@ function processAttrs (el) {
         } else {
           addAttr(el, name, value, list[i], isDynamic);
         }
+
+      // 解析v-on属性 Chang-Jin 2019-11-13
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '');
         isDynamic = dynamicArgRE.test(name);
@@ -4381,6 +4456,7 @@ function processAttrs (el) {
         }
       }
     } else {
+      // 普通属性 Chang-Jin 2019-11-13
       // literal attribute
       {
         var res = parseText(value, delimiters);
@@ -4394,6 +4470,8 @@ function processAttrs (el) {
           );
         }
       }
+
+      // 把属性添加到ast的element上 Chang-Jin 2019-11-13
       addAttr(el, name, JSON.stringify(value), list[i]);
       // #6887 firefox doesn't update muted state if set via attribute
       // even immediately after element creation
@@ -4970,7 +5048,7 @@ var CodegenState = function CodegenState (options) {
   this.dataGenFns = pluckModuleFunction(options.modules, 'genData');
   this.directives = extend(extend({}, baseDirectives$1), options.directives);
   var isReservedTag = options.isReservedTag || no;
-  this.maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
+  this.maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); }; // 是一个组件 或者 不标签名不是保留标签 Chang-Jin 2019-11-18
   this.onceId = 0;
   this.staticRenderFns = [];
   this.pre = false;
@@ -5010,12 +5088,14 @@ function genElement (el, state) {
   } else {
     // component or element
     var code;
+
+    // el.component保存的是<component :is="xxx">标签上is指向的模板 Chang-Jin 2019-11-15
     if (el.component) {
       code = genComponent(el.component, el, state);
     } else {
       var data;
       if (!el.plain || (el.pre && state.maybeComponent(el))) {
-        data = genData$2(el, state);
+        data = genData$2(el, state); // genData 用来生成_c第二个参数--给元素添加的属性 Chang-Jin 2019-11-15
       }
 
       var children = el.inlineTemplate ? null : genChildren(el, state, true);
@@ -5030,6 +5110,13 @@ function genElement (el, state) {
 }
 
 // hoist static sub-trees out
+/**
+ * 处理静态节点
+ *
+ * @param {ASTElement} el AST元素
+ * @param {CodegenState} state
+ * @returns {string} 一个处理静态节点的render函数字符串
+ */
 function genStatic (el, state) {
   el.staticProcessed = true;
   // Some elements (templates) need to behave differently inside of a v-pre
@@ -5039,6 +5126,8 @@ function genStatic (el, state) {
   if (el.pre) {
     state.pre = el.pre;
   }
+
+  // 对静态根节点及其子内容单独分离出来处理。 Chang-Jin 2019-11-15
   state.staticRenderFns.push(("with(this){return " + (genElement(el, state)) + "}"));
   state.pre = originalPreState;
   return ("_m(" + (state.staticRenderFns.length - 1) + (el.staticInFor ? ',true' : '') + ")")
@@ -5175,7 +5264,7 @@ function genData$2 (el, state) {
   }
   // attributes
   if (el.attrs) {
-    data += "attrs:" + (genProps(el.attrs)) + ",";
+    data += "attrs:" + (genProps(el.attrs)) + ","; // genProps把属性链接为字符串 Chang-Jin 2019-11-15
   }
   // DOM props
   if (el.props) {
@@ -5390,6 +5479,8 @@ function genChildren (
       ? getNormalizationType(children, state.maybeComponent)
       : 0;
     var gen = altGenNode || genNode;
+
+    // 返回的字符串中对children依次执行getNode，并通过,相连
     return ("[" + (children.map(function (c) { return gen(c, state); }).join(',')) + "]" + (normalizationType$1 ? ("," + normalizationType$1) : ''))
   }
 }
@@ -5398,6 +5489,10 @@ function genChildren (
 // 0: no normalization needed
 // 1: simple normalization needed (possible 1-level deep nested array)
 // 2: full normalization needed
+// 确定子数组所需的归一化。
+// 0：无需归一化
+// 1：需要简单的归一化（可能的1级深度嵌套数组）
+// 2：需要完全归一化
 function getNormalizationType (
   children,
   maybeComponent
@@ -5408,11 +5503,16 @@ function getNormalizationType (
     if (el.type !== 1) {
       continue
     }
+
+    // el需要归一化 用来判断级别
+    // el是if块，但块内元素有内容符合上述三个条件的 Chang-Jin 2019-11-18
     if (needsNormalization(el) ||
         (el.ifConditions && el.ifConditions.some(function (c) { return needsNormalization(c.block); }))) {
       res = 2;
       break
     }
+
+    // el是自定义组件或el是if块，但块内元素有自定义组件的 Chang-Jin 2019-11-18
     if (maybeComponent(el) ||
         (el.ifConditions && el.ifConditions.some(function (c) { return maybeComponent(c.block); }))) {
       res = 1;
@@ -5421,6 +5521,7 @@ function getNormalizationType (
   return res
 }
 
+// el上有`v-for`或标签名是`template`或`slot` Chang-Jin 2019-11-18
 function needsNormalization (el) {
   return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
 }
@@ -5480,6 +5581,7 @@ function genComponent (
   return ("_c(" + componentName + "," + (genData$2(el, state)) + (children ? ("," + children) : '') + ")")
 }
 
+// 属性的键值用:对应，多个键值对用,隔开 Chang-Jin 2019-11-18
 function genProps (props) {
   var staticProps = "";
   var dynamicProps = "";
@@ -5493,6 +5595,8 @@ function genProps (props) {
     }
   }
   staticProps = "{" + (staticProps.slice(0, -1)) + "}";
+
+  // 如果是动态类型则用_d包裹 Chang-Jin 2019-11-18
   if (dynamicProps) {
     return ("_d(" + staticProps + ",[" + (dynamicProps.slice(0, -1)) + "])")
   } else {
@@ -6163,6 +6267,7 @@ function repeat$1 (str, n) {
 
 
 
+// 利用了new Function生成render函数 并catch错误。 Chang-Jin 2019-11-12
 function createFunction (code, errors) {
   try {
     return new Function(code)
@@ -6173,6 +6278,7 @@ function createFunction (code, errors) {
 }
 
 function createCompileToFunctionFn (compile) {
+  // 缓存编译之后的模板，方便之后复用 Chang-Jin 2019-11-12
   var cache = Object.create(null);
 
   return function compileToFunctions (
@@ -6206,13 +6312,16 @@ function createCompileToFunctionFn (compile) {
     var key = options.delimiters
       ? String(options.delimiters) + template
       : template;
+
+    // 从缓存中获取编译结果，没有则调用compile函数来编译 Chang-Jin 2019-11-12
     if (cache[key]) {
       return cache[key]
     }
 
-    // compile
+    // compile 把模板编译为ast语法树和render字符串
     var compiled = compile(template, options);
 
+    // 非生产环境下，这里会抛出编译过程中产生的错误
     // check compilation errors/tips
     {
       if (compiled.errors && compiled.errors.length) {
@@ -6244,7 +6353,10 @@ function createCompileToFunctionFn (compile) {
     // turn code into functions
     var res = {};
     var fnGenErrors = [];
+
+    // 通过new Function的方式把render字符串 转化为 render函数 Chang-Jin 2019-11-12
     res.render = createFunction(compiled.render, fnGenErrors);
+
     res.staticRenderFns = compiled.staticRenderFns.map(function (code) {
       return createFunction(code, fnGenErrors)
     });
@@ -6730,205 +6842,75 @@ function updateListeners (
 
 /*  */
 
-function extractPropsFromVNodeData (
-  data,
-  Ctor,
-  tag
+function extractPropsFromVNodeData(
+    data,
+    Ctor ,
+    tag 
 ) {
-  // we are only extracting raw values here.
-  // validation and default values are handled in the child
-  // component itself.
-  var propOptions = Ctor.options.props;
-  if (isUndef(propOptions)) {
-    return
-  }
-  var res = {};
-  var attrs = data.attrs;
-  var props = data.props;
-  if (isDef(attrs) || isDef(props)) {
-    for (var key in propOptions) {
-      var altKey = hyphenate(key);
-      {
-        var keyInLowerCase = key.toLowerCase();
-        if (
-          key !== keyInLowerCase &&
-          attrs && hasOwn(attrs, keyInLowerCase)
-        ) {
-          tip(
-            "Prop \"" + keyInLowerCase + "\" is passed to component " +
-            (formatComponentName(tag || Ctor)) + ", but the declared prop name is" +
-            " \"" + key + "\". " +
-            "Note that HTML attributes are case-insensitive and camelCased " +
-            "props need to use their kebab-case equivalents when using in-DOM " +
-            "templates. You should probably use \"" + altKey + "\" instead of \"" + key + "\"."
-          );
+    // we are only extracting raw values here.
+    // validation and default values are handled in the child
+    // component itself.
+    var propOptions = Ctor.options.props; // 在子组件中指定的props
+    if (isUndef(propOptions)) {
+        return
+    }
+    var res = {};
+    var attrs = data.attrs;
+    var props = data.props;
+
+    if (isDef(attrs) || isDef(props)) {
+        // 遍历propsOptions中的属性，props中没有指定的属性，即使在父组件中绑定了，子组件也找不到
+        for (var key in propOptions) {
+            var altKey = hyphenate(key); // altKey是驼峰命名属性的中划线连接式，myName转换为my-name
+
+            // 提示dom中的属性应该用kebab-case格式的值
+            {
+                var keyInLowerCase = key.toLowerCase();
+
+                if (
+                    key !== keyInLowerCase &&
+                    attrs && hasOwn(attrs, keyInLowerCase)
+                ) {
+                    tip(
+                        "Prop \"" + keyInLowerCase + "\" is passed to component " +
+                        (formatComponentName(tag || Ctor)) + ", but the declared prop name is" +
+                        " \"" + key + "\". " +
+                        "Note that HTML attributes are case-insensitive and camelCased " +
+                        "props need to use their kebab-case equivalents when using in-DOM " +
+                        "templates. You should probably use \"" + altKey + "\" instead of \"" + key + "\"."
+                    );
+                }
+            }
+            checkProp(res, props, key, altKey, true) ||
+            checkProp(res, attrs, key, altKey, false);
         }
-      }
-      checkProp(res, props, key, altKey, true) ||
-      checkProp(res, attrs, key, altKey, false);
     }
-  }
-  return res
+    return res
 }
 
-function checkProp (
-  res,
-  hash,
-  key,
-  altKey,
-  preserve
+function checkProp(
+    res,
+    hash,
+    key,
+    altKey,
+    preserve
 ) {
-  if (isDef(hash)) {
-    if (hasOwn(hash, key)) {
-      res[key] = hash[key];
-      if (!preserve) {
-        delete hash[key];
-      }
-      return true
-    } else if (hasOwn(hash, altKey)) {
-      res[key] = hash[altKey];
-      if (!preserve) {
-        delete hash[altKey];
-      }
-      return true
+    if (isDef(hash)) {
+        if (hasOwn(hash, key)) {
+            res[key] = hash[key];
+            if (!preserve) {
+                delete hash[key];
+            }
+            return true
+        } else if (hasOwn(hash, altKey)) {
+            res[key] = hash[altKey];
+            if (!preserve) {
+                delete hash[altKey];
+            }
+            return true
+        }
     }
-  }
-  return false
-}
-
-/*  */
-
-var SIMPLE_NORMALIZE = 1;
-var ALWAYS_NORMALIZE = 2;
-
-// wrapper function for providing a more flexible interface
-// without getting yelled at by flow
-function createElement (
-  context,
-  tag,
-  data,
-  children,
-  normalizationType,
-  alwaysNormalize
-) {
-  if (Array.isArray(data) || isPrimitive(data)) {
-    normalizationType = children;
-    children = data;
-    data = undefined;
-  }
-  if (isTrue(alwaysNormalize)) {
-    normalizationType = ALWAYS_NORMALIZE;
-  }
-  return _createElement(context, tag, data, children, normalizationType)
-}
-
-function _createElement (
-  context,
-  tag,
-  data,
-  children,
-  normalizationType
-) {
-  if (isDef(data) && isDef((data).__ob__)) {
-     warn(
-      "Avoid using observed data object as vnode data: " + (JSON.stringify(data)) + "\n" +
-      'Always create fresh vnode data objects in each render!',
-      context
-    );
-    return createEmptyVNode()
-  }
-  // object syntax in v-bind
-  if (isDef(data) && isDef(data.is)) {
-    tag = data.is;
-  }
-  if (!tag) {
-    // in case of component :is set to falsy value
-    return createEmptyVNode()
-  }
-  // warn against non-primitive key
-  if (
-    isDef(data) && isDef(data.key) && !isPrimitive(data.key)
-  ) {
-    {
-      warn(
-        'Avoid using non-primitive value as key, ' +
-        'use string/number value instead.',
-        context
-      );
-    }
-  }
-  // support single function children as default scoped slot
-  if (Array.isArray(children) &&
-    typeof children[0] === 'function'
-  ) {
-    data = data || {};
-    data.scopedSlots = { default: children[0] };
-    children.length = 0;
-  }
-  if (normalizationType === ALWAYS_NORMALIZE) {
-    children = normalizeChildren(children);
-  } else if (normalizationType === SIMPLE_NORMALIZE) {
-    children = simpleNormalizeChildren(children);
-  }
-  var vnode, ns;
-  if (typeof tag === 'string') {
-    var Ctor;
-    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
-    if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-      // component
-      vnode = createComponent(Ctor, data, context, children, tag);
-    } else {
-      // unknown or unlisted namespaced elements
-      // check at runtime because it may get assigned a namespace when its
-      // parent normalizes children
-      vnode = new VNode(
-        tag, data, children,
-        undefined, undefined, context
-      );
-    }
-  } else {
-    // direct component options / constructor
-    vnode = createComponent(tag, data, context, children);
-  }
-  if (Array.isArray(vnode)) {
-    return vnode
-  } else if (isDef(vnode)) {
-    if (isDef(ns)) { applyNS(vnode, ns); }
-    if (isDef(data)) { registerDeepBindings(data); }
-    return vnode
-  } else {
-    return createEmptyVNode()
-  }
-}
-
-function applyNS (vnode, ns, force) {
-  vnode.ns = ns;
-  if (vnode.tag === 'foreignObject') {
-    // use default namespace inside foreignObject
-    ns = undefined;
-    force = true;
-  }
-  if (isDef(vnode.children)) {
-    for (var i = 0, l = vnode.children.length; i < l; i++) {
-      var child = vnode.children[i];
-      if (isDef(child.tag) && (
-        isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
-        applyNS(child, ns, force);
-      }
-    }
-  }
-}
-
-// ref #5318
-// necessary to ensure parent re-render when deep bindings like :style and
-// :class are used on slot nodes
-function registerDeepBindings (data) {
-  if (isObject(data.style)) {
-    traverse(data.style);
-  }
-  if (isObject(data.class)) {
-    traverse(data.class);
-  }
+    return false
 }
 
 /*  */
@@ -6974,6 +6956,169 @@ function renderList (
   }
   (ret)._isVList = true;
   return ret
+}
+
+/*  */
+
+var SIMPLE_NORMALIZE = 1;
+var ALWAYS_NORMALIZE = 2;
+
+// wrapper function for providing a more flexible interface
+// without getting yelled at by flow
+function createElement(
+    context, // 当前的vm对象
+    tag, // 标签名
+    data, // 节点相关的属性
+    children, // 子元素
+    normalizationType, // 子元素归一化的处理的级别
+    alwaysNormalize // 是否总是归一化处理
+) {
+
+    // 判断是否有相关属性 没有属性 则向前取值
+    if (Array.isArray(data) || isPrimitive(data)) {
+        normalizationType = children;
+        children = data;
+        data = undefined;
+    }
+
+    if (isTrue(alwaysNormalize)) {
+        normalizationType = ALWAYS_NORMALIZE;
+    }
+
+    return _createElement(context, tag, data, children, normalizationType)
+}
+
+function _createElement(
+    context,
+    tag ,
+    data ,
+    children ,
+    normalizationType 
+) {
+    // 数据已被Oberser
+    if (isDef(data) && isDef((data).__ob__)) {
+         warn(
+            "Avoid using observed data object as vnode data: " + (JSON.stringify(data)) + "\n" +
+            'Always create fresh vnode data objects in each render!',
+            context
+        );
+        return createEmptyVNode()
+    }
+    // object syntax in v-bind
+    // is语法用在component上 Chang-Jin 2019-11-19
+    if (isDef(data) && isDef(data.is)) {
+        tag = data.is;
+    }
+
+    // 判断tag是不是为空，如果为空则直接返回一个空的VNode Chang-Jin 2019-11-18
+    if (!tag) {
+        // in case of component :is set to falsy value
+        return createEmptyVNode()
+    }
+
+    // warn against non-primitive key
+    if (
+        isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+    ) {
+        {
+            warn(
+                'Avoid using non-primitive value as key, ' +
+                'use string/number value instead.',
+                context
+            );
+        }
+    }
+
+    // support single function children as default scoped slot
+    // 子元素第一个参数为函数，则作为默认的slot Chang-Jin 2019-11-18
+    if (Array.isArray(children) &&
+        typeof children[0] === 'function'
+    ) {
+        data = data || {};
+        data.scopedSlots = {
+            default: children[0]
+        };
+        children.length = 0;
+    }
+
+    // 对子元素进行归一化 Chang-Jin 2019-11-18
+    if (normalizationType === ALWAYS_NORMALIZE) {
+        children = normalizeChildren(children);
+    } else if (normalizationType === SIMPLE_NORMALIZE) {
+        children = simpleNormalizeChildren(children);
+    }
+
+    var vnode, ns;
+
+    if (typeof tag === 'string') {
+        var Ctor;
+        ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
+        // tag是字符串又是平台保留标签名。则直接创建VNode对象 Chang-Jin 2019-11-18
+        if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+            // component
+            vnode = createComponent(Ctor, data, context, children, tag);
+
+        // tag是字符串，但既不是平台保留标签名，也不是components中的自定义标签 Chang-Jin 2019-11-18
+        } else {
+            // unknown or unlisted namespaced elements
+            // check at runtime because it may get assigned a namespace when its
+            // parent normalizes children
+            vnode = new VNode(
+                tag, data, children,
+                undefined, undefined, context
+            );
+        }
+    } else {
+        // tag不是字符串 可能直接是一个Vue的子类 Chang-Jin 2019-11-18
+        // new Vue({
+        //     render: function(h) {
+        //         return h(Vue.extend({
+        //             template: '<div>test</div>'
+        //         }))
+        //     }
+        // }).$mount('#app')
+        // direct component options / constructor
+        vnode = createComponent(tag, data, context, children);
+    }
+    if (Array.isArray(vnode)) {
+        return vnode
+    } else if (isDef(vnode)) {
+        if (isDef(ns)) { applyNS(vnode, ns); }
+        if (isDef(data)) { registerDeepBindings(data); }
+        return vnode
+    } else {
+        return createEmptyVNode()
+    }
+}
+
+function applyNS(vnode, ns, force) {
+    vnode.ns = ns;
+    if (vnode.tag === 'foreignObject') {
+        // use default namespace inside foreignObject
+        ns = undefined;
+        force = true;
+    }
+    if (isDef(vnode.children)) {
+        for (var i = 0, l = vnode.children.length; i < l; i++) {
+            var child = vnode.children[i];
+            if (isDef(child.tag) && (
+                    isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
+                applyNS(child, ns, force);
+            }
+        }
+    }
+}
+
+// ref #5318
+// necessary to ensure parent re-render when deep bindings like :style and
+// :class are used on slot nodes
+function registerDeepBindings(data) {
+    if (isObject(data.style)) {
+        traverse(data.style);
+    }
+    if (isObject(data.class)) {
+        traverse(data.class);
+    }
 }
 
 /*  */
@@ -7115,6 +7260,14 @@ function bindObjectProps (
 /**
  * Runtime helper for rendering static trees.
  */
+/**
+ * 渲染静态内容
+ *
+ * @export
+ * @param {number} index 索引值 指向最终生成的staticRenderFns数组中对应的内容
+ * @param {boolean} isInFor 标识元素是否包裹在for循环中
+ * @returns {(VNode | Array<VNode>)}
+ */
 function renderStatic (
   index,
   isInFor
@@ -7250,16 +7403,16 @@ function prependModifier (value, symbol) {
 function installRenderHelpers (target) {
   target._o = markOnce;
   target._n = toNumber;
-  target._s = toString;
+  target._s = toString; // 把一个值转换为字符串
   target._l = renderList;
   target._t = renderSlot;
   target._q = looseEqual;
   target._i = looseIndexOf;
-  target._m = renderStatic;
+  target._m = renderStatic; // 渲染静态内容
   target._f = resolveFilter;
   target._k = checkKeyCodes;
   target._b = bindObjectProps;
-  target._v = createTextVNode;
+  target._v = createTextVNode; // 创建一个文本节点
   target._e = createEmptyVNode;
   target._u = resolveScopedSlots;
   target._g = bindObjectListeners;
@@ -7589,134 +7742,134 @@ function updateComponentListeners (
 
 var activeInstance = null;
 
-function updateChildComponent (
-  vm,
-  propsData,
-  listeners,
-  parentVnode,
-  renderChildren
+function updateChildComponent(
+    vm,
+    propsData,
+    listeners,
+    parentVnode,
+    renderChildren
 ) {
 
-  // determine whether component has slot children
-  // we need to do this before overwriting $options._renderChildren.
+    // determine whether component has slot children
+    // we need to do this before overwriting $options._renderChildren.
 
-  // check if there are dynamic scopedSlots (hand-written or compiled but with
-  // dynamic slot names). Static scoped slots compiled from template has the
-  // "$stable" marker.
-  var newScopedSlots = parentVnode.data.scopedSlots;
-  var oldScopedSlots = vm.$scopedSlots;
-  var hasDynamicScopedSlot = !!(
-    (newScopedSlots && !newScopedSlots.$stable) ||
-    (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
-    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
-  );
+    // check if there are dynamic scopedSlots (hand-written or compiled but with
+    // dynamic slot names). Static scoped slots compiled from template has the
+    // "$stable" marker.
+    var newScopedSlots = parentVnode.data.scopedSlots;
+    var oldScopedSlots = vm.$scopedSlots;
+    var hasDynamicScopedSlot = !!(
+        (newScopedSlots && !newScopedSlots.$stable) ||
+        (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
+        (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
+    );
 
-  // Any static slot children from the parent may have changed during parent's
-  // update. Dynamic scoped slots may also have changed. In such cases, a forced
-  // update is necessary to ensure correctness.
-  var needsForceUpdate = !!(
-    renderChildren ||               // has new static slots
-    vm.$options._renderChildren ||  // has old static slots
-    hasDynamicScopedSlot
-  );
+    // Any static slot children from the parent may have changed during parent's
+    // update. Dynamic scoped slots may also have changed. In such cases, a forced
+    // update is necessary to ensure correctness.
+    var needsForceUpdate = !!(
+        renderChildren || // has new static slots
+        vm.$options._renderChildren || // has old static slots
+        hasDynamicScopedSlot
+    );
 
-  vm.$options._parentVnode = parentVnode;
-  vm.$vnode = parentVnode; // update vm's placeholder node without re-render
+    vm.$options._parentVnode = parentVnode;
+    vm.$vnode = parentVnode; // update vm's placeholder node without re-render
 
-  if (vm._vnode) { // update child tree's parent
-    vm._vnode.parent = parentVnode;
-  }
-  vm.$options._renderChildren = renderChildren;
-
-  // update $attrs and $listeners hash
-  // these are also reactive so they may trigger child update if the child
-  // used them during render
-  vm.$attrs = parentVnode.data.attrs || emptyObject;
-  vm.$listeners = listeners || emptyObject;
-
-  // update props
-  if (propsData && vm.$options.props) {
-    toggleObserving(false);
-    var props = vm._props;
-    var propKeys = vm.$options._propKeys || [];
-    for (var i = 0; i < propKeys.length; i++) {
-      var key = propKeys[i];
-      var propOptions = vm.$options.props; // wtf flow?
-      props[key] = validateProp(key, propOptions, propsData, vm);
+    if (vm._vnode) { // update child tree's parent
+        vm._vnode.parent = parentVnode;
     }
-    toggleObserving(true);
-    // keep a copy of raw propsData
-    vm.$options.propsData = propsData;
-  }
+    vm.$options._renderChildren = renderChildren;
 
-  // update listeners
-  listeners = listeners || emptyObject;
-  var oldListeners = vm.$options._parentListeners;
-  vm.$options._parentListeners = listeners;
-  updateComponentListeners(vm, listeners, oldListeners);
+    // update $attrs and $listeners hash
+    // these are also reactive so they may trigger child update if the child
+    // used them during render
+    vm.$attrs = parentVnode.data.attrs || emptyObject;
+    vm.$listeners = listeners || emptyObject;
 
-  // resolve slots + force update if has children
-  if (needsForceUpdate) {
-    vm.$slots = resolveSlots(renderChildren, parentVnode.context);
-    vm.$forceUpdate();
-  }
+    // update props
+    if (propsData && vm.$options.props) {
+        toggleObserving(false);
+        var props = vm._props;
+        var propKeys = vm.$options._propKeys || [];
+        for (var i = 0; i < propKeys.length; i++) {
+            var key = propKeys[i];
+            var propOptions = vm.$options.props; // wtf flow?
+            props[key] = validateProp(key, propOptions, propsData, vm);
+        }
+        toggleObserving(true);
+        // keep a copy of raw propsData
+        vm.$options.propsData = propsData;
+    }
+
+    // update listeners
+    listeners = listeners || emptyObject;
+    var oldListeners = vm.$options._parentListeners;
+    vm.$options._parentListeners = listeners;
+    updateComponentListeners(vm, listeners, oldListeners);
+
+    // resolve slots + force update if has children
+    if (needsForceUpdate) {
+        vm.$slots = resolveSlots(renderChildren, parentVnode.context);
+        vm.$forceUpdate();
+    }
 }
 
-function isInInactiveTree (vm) {
-  while (vm && (vm = vm.$parent)) {
-    if (vm._inactive) { return true }
-  }
-  return false
+function isInInactiveTree(vm) {
+    while (vm && (vm = vm.$parent)) {
+        if (vm._inactive) { return true }
+    }
+    return false
 }
 
-function activateChildComponent (vm, direct) {
-  if (direct) {
-    vm._directInactive = false;
-    if (isInInactiveTree(vm)) {
-      return
+function activateChildComponent(vm, direct ) {
+    if (direct) {
+        vm._directInactive = false;
+        if (isInInactiveTree(vm)) {
+            return
+        }
+    } else if (vm._directInactive) {
+        return
     }
-  } else if (vm._directInactive) {
-    return
-  }
-  if (vm._inactive || vm._inactive === null) {
-    vm._inactive = false;
-    for (var i = 0; i < vm.$children.length; i++) {
-      activateChildComponent(vm.$children[i]);
+    if (vm._inactive || vm._inactive === null) {
+        vm._inactive = false;
+        for (var i = 0; i < vm.$children.length; i++) {
+            activateChildComponent(vm.$children[i]);
+        }
+        callHook(vm, 'activated');
     }
-    callHook(vm, 'activated');
-  }
 }
 
-function deactivateChildComponent (vm, direct) {
-  if (direct) {
-    vm._directInactive = true;
-    if (isInInactiveTree(vm)) {
-      return
+function deactivateChildComponent(vm, direct ) {
+    if (direct) {
+        vm._directInactive = true;
+        if (isInInactiveTree(vm)) {
+            return
+        }
     }
-  }
-  if (!vm._inactive) {
-    vm._inactive = true;
-    for (var i = 0; i < vm.$children.length; i++) {
-      deactivateChildComponent(vm.$children[i]);
+    if (!vm._inactive) {
+        vm._inactive = true;
+        for (var i = 0; i < vm.$children.length; i++) {
+            deactivateChildComponent(vm.$children[i]);
+        }
+        callHook(vm, 'deactivated');
     }
-    callHook(vm, 'deactivated');
-  }
 }
 
-function callHook (vm, hook) {
-  // #7573 disable dep collection when invoking lifecycle hooks
-  pushTarget();
-  var handlers = vm.$options[hook];
-  var info = hook + " hook";
-  if (handlers) {
-    for (var i = 0, j = handlers.length; i < j; i++) {
-      invokeWithErrorHandling(handlers[i], vm, null, vm, info);
+function callHook(vm, hook) {
+    // #7573 disable dep collection when invoking lifecycle hooks
+    pushTarget();
+    var handlers = vm.$options[hook];
+    var info = hook + " hook";
+    if (handlers) {
+        for (var i = 0, j = handlers.length; i < j; i++) {
+            invokeWithErrorHandling(handlers[i], vm, null, vm, info);
+        }
     }
-  }
-  if (vm._hasHookEvent) {
-    vm.$emit('hook:' + hook);
-  }
-  popTarget();
+    if (vm._hasHookEvent) {
+        vm.$emit('hook:' + hook);
+    }
+    popTarget();
 }
 
 /*  */
@@ -7977,230 +8130,262 @@ function mergeProps (to, from) {
 
 // inline hooks to be invoked on component VNodes during patch
 var componentVNodeHooks = {
-  init: function init (vnode, hydrating) {
-    if (
-      vnode.componentInstance &&
-      !vnode.componentInstance._isDestroyed &&
-      vnode.data.keepAlive
-    ) {
-      // kept-alive components, treat as a patch
-      var mountedNode = vnode; // work around flow
-      componentVNodeHooks.prepatch(mountedNode, mountedNode);
-    } else {
-      var child = vnode.componentInstance = createComponentInstanceForVnode(
-        vnode,
-        activeInstance
-      );
-      child.$mount(hydrating ? vnode.elm : undefined, hydrating);
-    }
-  },
+    init: function init(vnode, hydrating) {
+        if (
+            vnode.componentInstance &&
+            !vnode.componentInstance._isDestroyed &&
+            vnode.data.keepAlive
+        ) {
+            // kept-alive components, treat as a patch
+            var mountedNode = vnode; // work around flow
+            componentVNodeHooks.prepatch(mountedNode, mountedNode);
+        } else {
+            var child = vnode.componentInstance = createComponentInstanceForVnode(
+                vnode,
+                activeInstance
+            );
+            child.$mount(hydrating ? vnode.elm : undefined, hydrating);
+        }
+    },
 
-  prepatch: function prepatch (oldVnode, vnode) {
-    var options = vnode.componentOptions;
-    var child = vnode.componentInstance = oldVnode.componentInstance;
-    updateChildComponent(
-      child,
-      options.propsData, // updated props
-      options.listeners, // updated listeners
-      vnode, // new parent vnode
-      options.children // new children
-    );
-  },
+    prepatch: function prepatch(oldVnode, vnode) {
+        var options = vnode.componentOptions;
+        var child = vnode.componentInstance = oldVnode.componentInstance;
+        updateChildComponent(
+            child,
+            options.propsData, // updated props
+            options.listeners, // updated listeners
+            vnode, // new parent vnode
+            options.children // new children
+        );
+    },
 
-  insert: function insert (vnode) {
-    var context = vnode.context;
-    var componentInstance = vnode.componentInstance;
-    if (!componentInstance._isMounted) {
-      componentInstance._isMounted = true;
-      callHook(componentInstance, 'mounted');
-    }
-    if (vnode.data.keepAlive) {
-      if (context._isMounted) {
-        // vue-router#1212
-        // During updates, a kept-alive component's child components may
-        // change, so directly walking the tree here may call activated hooks
-        // on incorrect children. Instead we push them into a queue which will
-        // be processed after the whole patch process ended.
-        queueActivatedComponent(componentInstance);
-      } else {
-        activateChildComponent(componentInstance, true /* direct */);
-      }
-    }
-  },
+    insert: function insert(vnode) {
+        var context = vnode.context;
+        var componentInstance = vnode.componentInstance;
+        if (!componentInstance._isMounted) {
+            componentInstance._isMounted = true;
+            callHook(componentInstance, 'mounted');
+        }
+        if (vnode.data.keepAlive) {
+            if (context._isMounted) {
+                // vue-router#1212
+                // During updates, a kept-alive component's child components may
+                // change, so directly walking the tree here may call activated hooks
+                // on incorrect children. Instead we push them into a queue which will
+                // be processed after the whole patch process ended.
+                queueActivatedComponent(componentInstance);
+            } else {
+                activateChildComponent(componentInstance, true /* direct */ );
+            }
+        }
+    },
 
-  destroy: function destroy (vnode) {
-    var componentInstance = vnode.componentInstance;
-    if (!componentInstance._isDestroyed) {
-      if (!vnode.data.keepAlive) {
-        componentInstance.$destroy();
-      } else {
-        deactivateChildComponent(componentInstance, true /* direct */);
-      }
+    destroy: function destroy(vnode) {
+        var componentInstance = vnode.componentInstance;
+        if (!componentInstance._isDestroyed) {
+            if (!vnode.data.keepAlive) {
+                componentInstance.$destroy();
+            } else {
+                deactivateChildComponent(componentInstance, true /* direct */ );
+            }
+        }
     }
-  }
 };
 
+// hooksToMerge共有四个值init、prepatch、insert、destroy
 var hooksToMerge = Object.keys(componentVNodeHooks);
 
-function createComponent (
-  Ctor,
-  data,
-  context,
-  children,
-  tag
+/**
+ * 生成组件对应的VNode
+ *
+ * @export
+ * @param {(Class<Component> | Function | Object | void)} Ctor 组件的配置项
+ * @param {? VNodeData} data 组件标签上的属性
+ * @param {Component} context 组件所在的vm对象
+ * @param {? Array<VNode>} children 组件内的children 应该就是slot了
+ * @param {string} [tag] 标签名
+ * @returns {(VNode | Array<VNode> | void)} 返回组件对应的VNode对象
+ */
+function createComponent(
+    Ctor,
+    data,
+    context,
+    children ,
+    tag 
 ) {
-  if (isUndef(Ctor)) {
-    return
-  }
-
-  var baseCtor = context.$options._base;
-
-  // plain options object: turn it into a constructor
-  if (isObject(Ctor)) {
-    Ctor = baseCtor.extend(Ctor);
-  }
-
-  // if at this stage it's not a constructor or an async component factory,
-  // reject.
-  if (typeof Ctor !== 'function') {
-    {
-      warn(("Invalid Component definition: " + (String(Ctor))), context);
+    // Ctor为空表示从context的components属性上没找到tag对应的属性 Chang-Jin 2019-11-19
+    if (isUndef(Ctor)) {
+        return
     }
-    return
-  }
 
-  // async component
-  var asyncFactory;
-  if (isUndef(Ctor.cid)) {
-    asyncFactory = Ctor;
-    Ctor = resolveAsyncComponent(asyncFactory, baseCtor);
-    if (Ctor === undefined) {
-      // return a placeholder node for async component, which is rendered
-      // as a comment node but preserves all the raw information for the node.
-      // the information will be used for async server-rendering and hydration.
-      return createAsyncPlaceholder(
-        asyncFactory,
-        data,
-        context,
-        children,
-        tag
-      )
+    var baseCtor = context.$options._base; // _base就是Vue
+
+    // plain options object: turn it into a constructor
+    // 普通选项对象：将其转换为构造函数
+    if (isObject(Ctor)) {
+        Ctor = baseCtor.extend(Ctor); // 通过extend得到一个Vue的子类 Chang-Jin 2019-11-19
     }
-  }
 
-  data = data || {};
-
-  // resolve constructor options in case global mixins are applied after
-  // component constructor creation
-  resolveConstructorOptions(Ctor);
-
-  // transform component v-model data into props & events
-  if (isDef(data.model)) {
-    transformModel(Ctor.options, data);
-  }
-
-  // extract props
-  var propsData = extractPropsFromVNodeData(data, Ctor, tag);
-
-  // functional component
-  if (isTrue(Ctor.options.functional)) {
-    return createFunctionalComponent(Ctor, propsData, data, context, children)
-  }
-
-  // extract listeners, since these needs to be treated as
-  // child component listeners instead of DOM listeners
-  var listeners = data.on;
-  // replace with listeners with .native modifier
-  // so it gets processed during parent component patch.
-  data.on = data.nativeOn;
-
-  if (isTrue(Ctor.options.abstract)) {
-    // abstract components do not keep anything
-    // other than props & listeners & slot
-
-    // work around flow
-    var slot = data.slot;
-    data = {};
-    if (slot) {
-      data.slot = slot;
+    // if at this stage it's not a constructor or an async component factory,
+    // reject.
+    if (typeof Ctor !== 'function') {
+        {
+            warn(("Invalid Component definition: " + (String(Ctor))), context);
+        }
+        return
     }
-  }
 
-  // install component management hooks onto the placeholder node
-  installComponentHooks(data);
+    // async component
+    // 处理异步组件
+    var asyncFactory;
+    if (isUndef(Ctor.cid)) {
+        asyncFactory = Ctor;
+        Ctor = resolveAsyncComponent(asyncFactory, baseCtor);
+        if (Ctor === undefined) {
+            // return a placeholder node for async component, which is rendered
+            // as a comment node but preserves all the raw information for the node.
+            // the information will be used for async server-rendering and hydration.
+            return createAsyncPlaceholder(
+                asyncFactory,
+                data,
+                context,
+                children,
+                tag
+            )
+        }
+    }
 
-  // return a placeholder vnode
-  var name = Ctor.options.name || tag;
-  var vnode = new VNode(
-    ("vue-component-" + (Ctor.cid) + (name ? ("-" + name) : '')),
-    data, undefined, undefined, undefined, context,
-    { Ctor: Ctor, propsData: propsData, listeners: listeners, tag: tag, children: children },
-    asyncFactory
-  );
+    data = data || {};
 
-  return vnode
+    // resolve constructor options in case global mixins are applied after
+    // component constructor creation
+    // 递归合并父对象上的options属性
+    resolveConstructorOptions(Ctor);
+
+    // transform component v-model data into props & events
+    // 对元素上v-model指令的处理
+    if (isDef(data.model)) {
+        transformModel(Ctor.options, data);
+    }
+
+    // extract props
+    // 根据子组件定义的props 抽取子组件上传递的数据  如果没有在props上定义 不会抽取
+    var propsData = extractPropsFromVNodeData(data, Ctor, tag);
+
+    // functional component
+    if (isTrue(Ctor.options.functional)) {
+        return createFunctionalComponent(Ctor, propsData, data, context, children)
+    }
+
+    // extract listeners, since these needs to be treated as
+    // child component listeners instead of DOM listeners
+    // 提取listener，因为这些需要被视为
+    // 子组件listener，而不是DOM listener
+    var listeners = data.on;
+    // replace with listeners with .native modifier
+    // so it gets processed during parent component patch.
+    // 用.native修饰符替换为listener
+    // 因此会在父组件patch期间对其进行处理。
+    data.on = data.nativeOn;
+
+    if (isTrue(Ctor.options.abstract)) { // Ctor.options.abstract是KeepLive等抽象组件
+        // abstract components do not keep anything
+        // other than props & listeners & slot
+        // 抽象组件除了保留props，监听器和插槽之外，不保留其他任何东西
+        // work around flow
+        var slot = data.slot;
+        data = {};
+        if (slot) {
+            data.slot = slot;
+        }
+    }
+
+    // install component management hooks onto the placeholder node
+    // 将组件管理挂钩安装到占位符节点上
+    installComponentHooks(data);
+
+    // return a placeholder vnode
+    var name = Ctor.options.name || tag;
+    var vnode = new VNode(
+        ("vue-component-" + (Ctor.cid) + (name ? ("-" + name) : '')),
+        data, undefined, undefined, undefined, context, {
+            Ctor: Ctor,
+            propsData: propsData,
+            listeners: listeners,
+            tag: tag,
+            children: children
+        },
+        asyncFactory
+    );
+
+    return vnode
 }
 
-function createComponentInstanceForVnode (
-  vnode, // we know it's MountedComponentVNode but flow doesn't
-  parent // activeInstance in lifecycle state
+function createComponentInstanceForVnode(
+    vnode, // we know it's MountedComponentVNode but flow doesn't
+    parent // activeInstance in lifecycle state
 ) {
-  var options = {
-    _isComponent: true,
-    _parentVnode: vnode,
-    parent: parent
-  };
-  // check inline-template render functions
-  var inlineTemplate = vnode.data.inlineTemplate;
-  if (isDef(inlineTemplate)) {
-    options.render = inlineTemplate.render;
-    options.staticRenderFns = inlineTemplate.staticRenderFns;
-  }
-  return new vnode.componentOptions.Ctor(options)
-}
-
-function installComponentHooks (data) {
-  var hooks = data.hook || (data.hook = {});
-  for (var i = 0; i < hooksToMerge.length; i++) {
-    var key = hooksToMerge[i];
-    var existing = hooks[key];
-    var toMerge = componentVNodeHooks[key];
-    if (existing !== toMerge && !(existing && existing._merged)) {
-      hooks[key] = existing ? mergeHook$1(toMerge, existing) : toMerge;
+    var options = {
+        _isComponent: true,
+        _parentVnode: vnode,
+        parent: parent
+    };
+    // check inline-template render functions
+    var inlineTemplate = vnode.data.inlineTemplate;
+    if (isDef(inlineTemplate)) {
+        options.render = inlineTemplate.render;
+        options.staticRenderFns = inlineTemplate.staticRenderFns;
     }
-  }
+    return new vnode.componentOptions.Ctor(options)
 }
 
-function mergeHook$1 (f1, f2) {
-  var merged = function (a, b) {
-    // flow complains about extra args which is why we use any
-    f1(a, b);
-    f2(a, b);
-  };
-  merged._merged = true;
-  return merged
+function installComponentHooks(data) {
+    var hooks = data.hook || (data.hook = {});
+    for (var i = 0; i < hooksToMerge.length; i++) {
+        var key = hooksToMerge[i];
+        var existing = hooks[key];
+        var toMerge = componentVNodeHooks[key];
+
+        // 如果data.hook上已经有了同名的钩子函数
+        // 则创建一个新的函数，其内部分别调用这两个同名函数
+        // 否则直接添加到data.hook对象上
+        if (existing !== toMerge && !(existing && existing._merged)) {
+            hooks[key] = existing ? mergeHook$1(toMerge, existing) : toMerge;
+        }
+    }
+}
+
+function mergeHook$1(f1, f2) {
+    var merged = function (a, b) {
+        // flow complains about extra args which is why we use any
+        f1(a, b);
+        f2(a, b);
+    };
+    merged._merged = true;
+    return merged
 }
 
 // transform component v-model info (value and callback) into
 // prop and event handler respectively.
-function transformModel (options, data) {
-  var prop = (options.model && options.model.prop) || 'value';
-  var event = (options.model && options.model.event) || 'input'
-  ;(data.attrs || (data.attrs = {}))[prop] = data.model.value;
-  var on = data.on || (data.on = {});
-  var existing = on[event];
-  var callback = data.model.callback;
-  if (isDef(existing)) {
-    if (
-      Array.isArray(existing)
-        ? existing.indexOf(callback) === -1
-        : existing !== callback
-    ) {
-      on[event] = [callback].concat(existing);
+function transformModel(options, data) {
+    var prop = (options.model && options.model.prop) || 'value';
+    var event = (options.model && options.model.event) || 'input';
+    (data.attrs || (data.attrs = {}))[prop] = data.model.value;
+    var on = data.on || (data.on = {});
+    var existing = on[event];
+    var callback = data.model.callback;
+    if (isDef(existing)) {
+        if (
+            Array.isArray(existing) ?
+            existing.indexOf(callback) === -1 :
+            existing !== callback
+        ) {
+            on[event] = [callback].concat(existing);
+        }
+    } else {
+        on[event] = callback;
     }
-  } else {
-    on[event] = callback;
-  }
 }
 
 /*  */

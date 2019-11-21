@@ -272,13 +272,23 @@
 
   // Regular Expressions for parsing tags and attributes
   var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-  var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+  var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/; // 匹配动态特性 Chang-Jin 2019-11-07
+
+  // 匹配其实标签名 Chang-Jin 2019-11-13
   var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z" + (unicodeRegExp.source) + "]*";
   var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
   var startTagOpen = new RegExp(("^<" + qnameCapture));
+
+  // 匹配起始标签的结束部分 做了一个单标签区分/ Chang-Jin 2019-11-13
   var startTagClose = /^\s*(\/?)>/;
+
+  // 匹配双标签的结束标签 Chang-Jin 2019-11-13
   var endTag = new RegExp(("^<\\/" + qnameCapture + "[^>]*>"));
+
+  // 文档声明 Chang-Jin 2019-11-13
   var doctype = /^<!DOCTYPE [^>]+>/i;
+
+  // html注释 Chang-Jin 2019-11-13
   // #7298: escape - to avoid being passed as HTML comment when inlined in page
   var comment = /^<!\--/;
   var conditionalComment = /^<!\[/;
@@ -315,12 +325,16 @@
     var canBeLeftOpenTag = options.canBeLeftOpenTag || no;
     var index = 0;
     var last, lastTag;
+
+    // html为模板 Chang-Jin 2019-11-13
     while (html) {
-      last = html;
+      last = html; // last保存还没解析的模板部分 Chang-Jin 2019-11-13
       // Make sure we're not in a plaintext content element like script/style
       if (!lastTag || !isPlainTextElement(lastTag)) {
         var textEnd = html.indexOf('<');
         if (textEnd === 0) {
+
+          // 过滤注释 Chang-Jin 2019-11-13
           // Comment:
           if (comment.test(html)) {
             var commentEnd = html.indexOf('-->');
@@ -334,6 +348,7 @@
             }
           }
 
+          // 过滤html注释 Chang-Jin 2019-11-13
           // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
           if (conditionalComment.test(html)) {
             var conditionalEnd = html.indexOf(']>');
@@ -344,6 +359,7 @@
             }
           }
 
+          // 过滤doctype Chang-Jin 2019-11-13
           // Doctype:
           var doctypeMatch = html.match(doctype);
           if (doctypeMatch) {
@@ -351,6 +367,7 @@
             continue
           }
 
+          // 匹配结束标签 Chang-Jin 2019-11-13
           // End tag:
           var endTagMatch = html.match(endTag);
           if (endTagMatch) {
@@ -436,12 +453,14 @@
     // Clean up any remaining tags
     parseEndTag();
 
+    // 把html从n位截取 并记录索引index的位置 Chang-Jin 2019-11-13
     function advance (n) {
       index += n;
       html = html.substring(n);
     }
 
     function parseStartTag () {
+      // 匹配标签名 Chang-Jin 2019-11-07
       var start = html.match(startTagOpen);
       if (start) {
         var match = {
@@ -451,14 +470,18 @@
         };
         advance(start[0].length);
         var end, attr;
+
+        // startTagClose是匹配标签的 /> 或 > dynamicArgAttribute是匹配动态属性 attribute 是匹配属性 Chang-Jin 2019-11-07
         while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
           attr.start = index;
           advance(attr[0].length);
           attr.end = index;
           match.attrs.push(attr);
         }
+
+        // 如果匹配到开始标签的> 则根据是否匹配到/来判断是否是单标签 Chang-Jin 2019-11-07
         if (end) {
-          match.unarySlash = end[1];
+          match.unarySlash = end[1]; // 匹配到的/
           advance(end[0].length);
           match.end = index;
           return match
@@ -466,14 +489,18 @@
       }
     }
 
+    // 对匹配到的开始标签 进一步加工 Chang-Jin 2019-11-13
     function handleStartTag (match) {
       var tagName = match.tagName;
       var unarySlash = match.unarySlash;
 
       if (expectHTML) {
+          // p标签中插入nonPhrasingTag p标签会在插入标签前自动闭合 Chang-Jin 2019-11-08
         if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
           parseEndTag(lastTag);
         }
+
+        // 能够不闭合的标签?
         if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
           parseEndTag(tagName);
         }
@@ -485,14 +512,17 @@
       var attrs = new Array(l);
       for (var i = 0; i < l; i++) {
         var args = match.attrs[i];
+        // args[3]是匹配到""包含的属性值 args[4]是匹配到''包含的属性值 args[5]是无引号包含的属性值 Chang-Jin 2019-11-07
         var value = args[3] || args[4] || args[5] || '';
         var shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
           ? options.shouldDecodeNewlinesForHref
           : options.shouldDecodeNewlines;
         attrs[i] = {
           name: args[1],
-          value: decodeAttr(value, shouldDecodeNewlines)
+          value: decodeAttr(value, shouldDecodeNewlines) //这里会对属性的值进行解码 防止IE上出BUG
         };
+
+        // 不是开发环境下需要属性的start和end值
         if ( options.outputSourceRange) {
           attrs[i].start = args.start + args[0].match(/^\s*/).length;
           attrs[i].end = args.end;
@@ -545,7 +575,7 @@
         }
 
         // Remove the open elements from the stack
-        stack.length = pos;
+        stack.length = pos; // 修改数组长度实现出栈 Chang-Jin 2019-11-08
         lastTag = pos && stack[pos - 1].tag;
       } else if (lowerCasedTagName === 'br') {
         if (options.start) {
@@ -1014,48 +1044,49 @@
   Dep.target = null;
 
   /*  */
-
-  var VNode = function VNode (
-    tag,
-    data,
-    children,
-    text,
-    elm,
-    context,
-    componentOptions,
-    asyncFactory
+  // VNode的构造函数 Chang-Jin 2019-11-18
+  var VNode = function VNode(
+      tag ,
+      data ,
+      children  ,
+      text ,
+      elm ,
+      context ,
+      componentOptions ,
+      asyncFactory 
   ) {
-    this.tag = tag;
-    this.data = data;
-    this.children = children;
-    this.text = text;
-    this.elm = elm;
-    this.ns = undefined;
-    this.context = context;
-    this.fnContext = undefined;
-    this.fnOptions = undefined;
-    this.fnScopeId = undefined;
-    this.key = data && data.key;
-    this.componentOptions = componentOptions;
-    this.componentInstance = undefined;
-    this.parent = undefined;
-    this.raw = false;
-    this.isStatic = false;
-    this.isRootInsert = true;
-    this.isComment = false;
-    this.isCloned = false;
-    this.isOnce = false;
-    this.asyncFactory = asyncFactory;
-    this.asyncMeta = undefined;
-    this.isAsyncPlaceholder = false;
+      this.tag = tag; // 标签名
+      this.data = data; // 结点相关属性数据
+      this.children = children; // 子节点
+      this.text = text; // 文本
+      this.elm = elm; // dom元素
+      this.ns = undefined; // 命名空间
+      this.context = context; // VNode所处Vue对象
+      this.fnContext = undefined;
+      this.fnOptions = undefined;
+      this.fnScopeId = undefined;
+      this.key = data && data.key;
+      this.componentOptions = componentOptions; // VNode对象如果对应的是一个自定义组件，componentOptions保存组件相关事件、props数据等
+      this.componentInstance = undefined; // VNode对象如果对应的是一个自定义组件，componentInstance保存相对应的vue实例
+      this.parent = undefined; // 当前自定义组件在父组件中的vnode
+      this.raw = false; // 包含原始HTML
+      this.isStatic = false; // 是否是静态内容
+      this.isRootInsert = true;
+      this.isComment = false; // 空注释占位符
+      this.isCloned = false; // 是否是clone的VNode对象
+      this.isOnce = false; // 是否是v-once元素的VNode对象
+      this.asyncFactory = asyncFactory;
+      this.asyncMeta = undefined;
+      this.isAsyncPlaceholder = false;
   };
 
   var prototypeAccessors = { child: { configurable: true } };
 
   // DEPRECATED: alias for componentInstance for backwards compat.
+  // 不推荐使用：向后兼容的componentInstance的别名。
   /* istanbul ignore next */
   prototypeAccessors.child.get = function () {
-    return this.componentInstance
+      return this.componentInstance
   };
 
   Object.defineProperties( VNode.prototype, prototypeAccessors );
@@ -1340,145 +1371,142 @@
    * Options with restrictions
    */
   {
-    strats.el = strats.propsData = function (parent, child, vm, key) {
-      if (!vm) {
-        warn(
-          "option \"" + key + "\" can only be used during instance " +
-          'creation with the `new` keyword.'
-        );
-      }
-      return defaultStrat(parent, child)
-    };
+      strats.el = strats.propsData = function(parent, child, vm, key) {
+          if (!vm) {
+              warn(
+                  "option \"" + key + "\" can only be used during instance " +
+                  'creation with the `new` keyword.'
+              );
+          }
+          return defaultStrat(parent, child)
+      };
   }
 
   /**
    * Helper that recursively merges two data objects together.
    */
-  function mergeData (to, from) {
-    if (!from) { return to }
-    var key, toVal, fromVal;
+  function mergeData(to, from) {
+      if (!from) { return to }
+      var key, toVal, fromVal;
 
-    var keys = hasSymbol
-      ? Reflect.ownKeys(from)
-      : Object.keys(from);
+      var keys = hasSymbol ?
+          Reflect.ownKeys(from) :
+          Object.keys(from);
 
-    for (var i = 0; i < keys.length; i++) {
-      key = keys[i];
-      // in case the object is already observed...
-      if (key === '__ob__') { continue }
-      toVal = to[key];
-      fromVal = from[key];
-      if (!hasOwn(to, key)) {
-        set(to, key, fromVal);
-      } else if (
-        toVal !== fromVal &&
-        isPlainObject(toVal) &&
-        isPlainObject(fromVal)
-      ) {
-        mergeData(toVal, fromVal);
+      for (var i = 0; i < keys.length; i++) {
+          key = keys[i];
+          // in case the object is already observed...
+          if (key === '__ob__') { continue }
+          toVal = to[key];
+          fromVal = from[key];
+          if (!hasOwn(to, key)) {
+              set(to, key, fromVal);
+          } else if (
+              toVal !== fromVal &&
+              isPlainObject(toVal) &&
+              isPlainObject(fromVal)
+          ) {
+              mergeData(toVal, fromVal);
+          }
       }
-    }
-    return to
+      return to
   }
 
   /**
    * Data
    */
-  function mergeDataOrFn (
-    parentVal,
-    childVal,
-    vm
+  function mergeDataOrFn(
+      parentVal,
+      childVal,
+      vm 
   ) {
-    if (!vm) {
-      // in a Vue.extend merge, both should be functions
-      if (!childVal) {
-        return parentVal
+      if (!vm) {
+          // in a Vue.extend merge, both should be functions
+          if (!childVal) {
+              return parentVal
+          }
+          if (!parentVal) {
+              return childVal
+          }
+          // when parentVal & childVal are both present,
+          // we need to return a function that returns the
+          // merged result of both functions... no need to
+          // check if parentVal is a function here because
+          // it has to be a function to pass previous merges.
+          return function mergedDataFn() {
+              return mergeData(
+                  typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+                  typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
+              )
+          }
+      } else {
+          return function mergedInstanceDataFn() {
+              // instance merge
+              var instanceData = typeof childVal === 'function' ?
+                  childVal.call(vm, vm) :
+                  childVal;
+              var defaultData = typeof parentVal === 'function' ?
+                  parentVal.call(vm, vm) :
+                  parentVal;
+              if (instanceData) {
+                  return mergeData(instanceData, defaultData)
+              } else {
+                  return defaultData
+              }
+          }
       }
-      if (!parentVal) {
-        return childVal
-      }
-      // when parentVal & childVal are both present,
-      // we need to return a function that returns the
-      // merged result of both functions... no need to
-      // check if parentVal is a function here because
-      // it has to be a function to pass previous merges.
-      return function mergedDataFn () {
-        return mergeData(
-          typeof childVal === 'function' ? childVal.call(this, this) : childVal,
-          typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
-        )
-      }
-    } else {
-      return function mergedInstanceDataFn () {
-        // instance merge
-        var instanceData = typeof childVal === 'function'
-          ? childVal.call(vm, vm)
-          : childVal;
-        var defaultData = typeof parentVal === 'function'
-          ? parentVal.call(vm, vm)
-          : parentVal;
-        if (instanceData) {
-          return mergeData(instanceData, defaultData)
-        } else {
-          return defaultData
-        }
-      }
-    }
   }
 
-  strats.data = function (
-    parentVal,
-    childVal,
-    vm
+  strats.data = function(
+      parentVal,
+      childVal,
+      vm 
   ) {
-    if (!vm) {
-      if (childVal && typeof childVal !== 'function') {
-         warn(
-          'The "data" option should be a function ' +
-          'that returns a per-instance value in component ' +
-          'definitions.',
-          vm
-        );
+      if (!vm) {
+          if (childVal && typeof childVal !== 'function') {
+               warn(
+                  'The "data" option should be a function ' +
+                  'that returns a per-instance value in component ' +
+                  'definitions.',
+                  vm
+              );
 
-        return parentVal
+              return parentVal
+          }
+          return mergeDataOrFn(parentVal, childVal)
       }
-      return mergeDataOrFn(parentVal, childVal)
-    }
 
-    return mergeDataOrFn(parentVal, childVal, vm)
+      return mergeDataOrFn(parentVal, childVal, vm)
   };
 
   /**
    * Hooks and props are merged as arrays.
    */
-  function mergeHook (
-    parentVal,
-    childVal
+  function mergeHook(
+      parentVal ,
+      childVal
   ) {
-    var res = childVal
-      ? parentVal
-        ? parentVal.concat(childVal)
-        : Array.isArray(childVal)
-          ? childVal
-          : [childVal]
-      : parentVal;
-    return res
-      ? dedupeHooks(res)
-      : res
+      var res = childVal ?
+          parentVal ?
+          parentVal.concat(childVal) :
+          Array.isArray(childVal) ?
+          childVal : [childVal] : parentVal;
+      return res ?
+          dedupeHooks(res) : res
   }
 
-  function dedupeHooks (hooks) {
-    var res = [];
-    for (var i = 0; i < hooks.length; i++) {
-      if (res.indexOf(hooks[i]) === -1) {
-        res.push(hooks[i]);
+  function dedupeHooks(hooks) {
+      var res = [];
+      for (var i = 0; i < hooks.length; i++) {
+          if (res.indexOf(hooks[i]) === -1) {
+              res.push(hooks[i]);
+          }
       }
-    }
-    return res
+      return res
   }
 
   LIFECYCLE_HOOKS.forEach(function (hook) {
-    strats[hook] = mergeHook;
+      strats[hook] = mergeHook;
   });
 
   /**
@@ -1488,23 +1516,23 @@
    * a three-way merge between constructor options, instance
    * options and parent options.
    */
-  function mergeAssets (
-    parentVal,
-    childVal,
-    vm,
-    key
+  function mergeAssets(
+      parentVal,
+      childVal,
+      vm ,
+      key
   ) {
-    var res = Object.create(parentVal || null);
-    if (childVal) {
-       assertObjectType(key, childVal, vm);
-      return extend(res, childVal)
-    } else {
-      return res
-    }
+      var res = Object.create(parentVal || null);
+      if (childVal) {
+           assertObjectType(key, childVal, vm);
+          return extend(res, childVal)
+      } else {
+          return res
+      }
   }
 
-  ASSET_TYPES.forEach(function (type) {
-    strats[type + 's'] = mergeAssets;
+  ASSET_TYPES.forEach(function(type) {
+      strats[type + 's'] = mergeAssets;
   });
 
   /**
@@ -1513,76 +1541,76 @@
    * Watchers hashes should not overwrite one
    * another, so we merge them as arrays.
    */
-  strats.watch = function (
-    parentVal,
-    childVal,
-    vm,
-    key
+  strats.watch = function(
+      parentVal,
+      childVal,
+      vm ,
+      key
   ) {
-    // work around Firefox's Object.prototype.watch...
-    if (parentVal === nativeWatch) { parentVal = undefined; }
-    if (childVal === nativeWatch) { childVal = undefined; }
-    /* istanbul ignore if */
-    if (!childVal) { return Object.create(parentVal || null) }
-    {
-      assertObjectType(key, childVal, vm);
-    }
-    if (!parentVal) { return childVal }
-    var ret = {};
-    extend(ret, parentVal);
-    for (var key$1 in childVal) {
-      var parent = ret[key$1];
-      var child = childVal[key$1];
-      if (parent && !Array.isArray(parent)) {
-        parent = [parent];
+      // work around Firefox's Object.prototype.watch...
+      if (parentVal === nativeWatch) { parentVal = undefined; }
+      if (childVal === nativeWatch) { childVal = undefined; }
+      /* istanbul ignore if */
+      if (!childVal) { return Object.create(parentVal || null) }
+      {
+          assertObjectType(key, childVal, vm);
       }
-      ret[key$1] = parent
-        ? parent.concat(child)
-        : Array.isArray(child) ? child : [child];
-    }
-    return ret
+      if (!parentVal) { return childVal }
+      var ret = {};
+      extend(ret, parentVal);
+      for (var key$1 in childVal) {
+          var parent = ret[key$1];
+          var child = childVal[key$1];
+          if (parent && !Array.isArray(parent)) {
+              parent = [parent];
+          }
+          ret[key$1] = parent ?
+              parent.concat(child) :
+              Array.isArray(child) ? child : [child];
+      }
+      return ret
   };
 
   /**
    * Other object hashes.
    */
   strats.props =
-  strats.methods =
-  strats.inject =
-  strats.computed = function (
-    parentVal,
-    childVal,
-    vm,
-    key
-  ) {
-    if (childVal && "development" !== 'production') {
-      assertObjectType(key, childVal, vm);
-    }
-    if (!parentVal) { return childVal }
-    var ret = Object.create(null);
-    extend(ret, parentVal);
-    if (childVal) { extend(ret, childVal); }
-    return ret
-  };
+      strats.methods =
+      strats.inject =
+      strats.computed = function(
+          parentVal,
+          childVal,
+          vm ,
+          key
+      ) {
+          if (childVal && "development" !== 'production') {
+              assertObjectType(key, childVal, vm);
+          }
+          if (!parentVal) { return childVal }
+          var ret = Object.create(null);
+          extend(ret, parentVal);
+          if (childVal) { extend(ret, childVal); }
+          return ret
+      };
   strats.provide = mergeDataOrFn;
 
   /**
    * Default strategy.
    */
-  var defaultStrat = function (parentVal, childVal) {
-    return childVal === undefined
-      ? parentVal
-      : childVal
+  var defaultStrat = function(parentVal, childVal) {
+      return childVal === undefined ?
+          parentVal :
+          childVal
   };
 
-  function assertObjectType (name, value, vm) {
-    if (!isPlainObject(value)) {
-      warn(
-        "Invalid value for option \"" + name + "\": expected an Object, " +
-        "but got " + (toRawType(value)) + ".",
-        vm
-      );
-    }
+  function assertObjectType(name, value, vm) {
+      if (!isPlainObject(value)) {
+          warn(
+              "Invalid value for option \"" + name + "\": expected an Object, " +
+              "but got " + (toRawType(value)) + ".",
+              vm
+          );
+      }
   }
 
   /*  */
@@ -1696,7 +1724,7 @@
 
   /*  */
 
-  var validDivisionCharRE = /[\w).+\-_$\]]/;
+  var validDivisionCharRE = /[\w).+\-_$\]]/; // 判断表达式是不是正则 Chang-Jin 2019-11-13
 
   // 过滤器解析会在 解析 文本和属性的时候用到 Chang-Jin 2019-11-07
   function parseFilters (exp) {
@@ -1799,8 +1827,8 @@
 
   /*  */
 
-  var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
-  var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
+  var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g; // 默认模板分割符匹配 Chang-Jin 2019-11-13
+  var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g; // 匹配需要转义的字符 Chang-Jin 2019-11-13
 
   var buildRegex = cached(function (delimiters) {
     var open = delimiters[0].replace(regexEscapeRE, '\\$&');
@@ -2680,16 +2708,16 @@
 
   /*  */
 
-  var onRE = /^@|^v-on:/;
+  var onRE = /^@|^v-on:/; // 匹配添加事件的语法 Chang-Jin 2019-11-13
   var dirRE =  /^v-|^@|^:|^#/;
-  var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
-  var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+  var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/; // 匹配v-for中的属性 如item in items、(item, index) of items Chang-Jin 2019-11-13
+  var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/; // 对forAliasRE中第一个捕获内容的拆解 in | of 前的部分 Chang-Jin 2019-11-13
   var stripParensRE = /^\(|\)$/g;
   var dynamicArgRE = /^\[.*\]$/;
 
-  var argRE = /:(.*)$/;
-  var bindRE = /^:|^\.|^v-bind:/;
-  var modifierRE = /\.[^.\]]+(?=[^\]]*$)/g;
+  var argRE = /:(.*)$/; // :开头的属性 Chang-Jin 2019-11-13
+  var bindRE = /^:|^\.|^v-bind:/; // 匹配:或v-bind开头的属性 Chang-Jin 2019-11-13
+  var modifierRE = /\.[^.\]]+(?=[^\]]*$)/g; // 匹配事件指令的修饰符 Chang-Jin 2019-11-13
 
   var slotRE = /^v-slot(:|$)|^#/;
 
@@ -2738,9 +2766,9 @@
   ) {
     warn$1 = options.warn || baseWarn;
 
-    platformIsPreTag = options.isPreTag || no;
-    platformMustUseProp = options.mustUseProp || no;
-    platformGetTagNamespace = options.getTagNamespace || no;
+    platformIsPreTag = options.isPreTag || no; // 是不是pre标签 Chang-Jin 2019-11-13
+    platformMustUseProp = options.mustUseProp || no; // 是否需要通过绑定prop来绑定属性 Chang-Jin 2019-11-13
+    platformGetTagNamespace = options.getTagNamespace || no; // 获取tag的命名空间 svg或math Chang-Jin 2019-11-13
     var isReservedTag = options.isReservedTag || no;
     maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
 
@@ -2748,7 +2776,7 @@
     preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
     postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
 
-    delimiters = options.delimiters;
+    delimiters = options.delimiters; // 自定义模板字符
 
     var stack = [];
     var preserveWhitespace = options.preserveWhitespace !== false;
@@ -2802,6 +2830,8 @@
             var name = element.slotTarget || '"default"'
             ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element;
           }
+
+          // 标签父子关系 Chang-Jin 2019-11-13
           currentParent.children.push(element);
           element.parent = currentParent;
         }
@@ -2820,6 +2850,8 @@
       if (platformIsPreTag(element.tag)) {
         inPre = false;
       }
+
+      // 后处理 Chang-Jin 2019-11-13
       // apply post-transforms
       for (var i = 0; i < postTransforms.length; i++) {
         postTransforms[i](element, options);
@@ -2877,12 +2909,14 @@
           attrs = guardIESVGBug(attrs);
         }
 
+        // 定义基本的ast结构 Chang-Jin 2019-11-13
         var element = createASTElement(tag, attrs, currentParent);
         if (ns) {
           element.ns = ns;
         }
 
         {
+          // 非生产环境 报错什么的需要提示位置
           if (options.outputSourceRange) {
             element.start = start$1;
             element.end = end;
@@ -2891,6 +2925,8 @@
               return cumulated
             }, {});
           }
+
+          // 检查属性值
           attrs.forEach(function (attr) {
             if (invalidAttributeRE.test(attr.name)) {
               warn$1(
@@ -2905,6 +2941,7 @@
           });
         }
 
+        // 检查标签
         if (isForbiddenTag(element) && !isServerRendering()) {
           element.forbidden = true;
            warn$1(
@@ -2915,12 +2952,14 @@
           );
         }
 
+        // 对ast进行预处理 Chang-Jin 2019-11-13
         // apply pre-transforms
         for (var i = 0; i < preTransforms.length; i++) {
           element = preTransforms[i](element, options) || element;
         }
 
         if (!inVPre) {
+          // 解析v-pre指令 Chang-Jin 2019-11-13
           processPre(element);
           if (element.pre) {
             inVPre = true;
@@ -2932,6 +2971,7 @@
         if (inVPre) {
           processRawAttrs(element);
         } else if (!element.processed) {
+          // 解析v-if v-for v-once指令 Chang-Jin 2019-11-13
           // structural directives
           processFor(element);
           processIf(element);
@@ -2955,6 +2995,7 @@
 
       end: function end (tag, start, end$1) {
         var element = stack[stack.length - 1];
+        // 出栈 Chang-Jin 2019-11-13
         // pop stack
         stack.length -= 1;
         currentParent = stack[stack.length - 1];
@@ -3092,6 +3133,7 @@
     element,
     options
   ) {
+    // 解析key指令 Chang-Jin 2019-11-13
     processKey(element);
 
     // determine whether this is a plain element after
@@ -3102,13 +3144,17 @@
       !element.attrsList.length
     );
 
+    // 解析ref slot component指令 Chang-Jin 2019-11-13
     processRef(element);
     processSlotContent(element);
     processSlotOutlet(element);
     processComponent(element);
+
+    // 对ast处理 Chang-Jin 2019-11-13
     for (var i = 0; i < transforms.length; i++) {
       element = transforms[i](element, options) || element;
     }
+
     processAttrs(element);
     return element
   }
@@ -3422,6 +3468,8 @@
     for (i = 0, l = list.length; i < l; i++) {
       name = rawName = list[i].name;
       value = list[i].value;
+
+      // 判断是否为指令
       if (dirRE.test(name)) {
         // mark element as dynamic
         el.hasBindings = true;
@@ -3431,6 +3479,8 @@
         if (modifiers) {
           name = name.replace(modifierRE, '');
         }
+
+        // 解析v-bind属性 Chang-Jin 2019-11-13
         if (bindRE.test(name)) { // v-bind
           name = name.replace(bindRE, '');
           value = parseFilters(value);
@@ -3499,6 +3549,8 @@
           } else {
             addAttr(el, name, value, list[i], isDynamic);
           }
+
+        // 解析v-on属性 Chang-Jin 2019-11-13
         } else if (onRE.test(name)) { // v-on
           name = name.replace(onRE, '');
           isDynamic = dynamicArgRE.test(name);
@@ -3525,6 +3577,7 @@
           }
         }
       } else {
+        // 普通属性 Chang-Jin 2019-11-13
         // literal attribute
         {
           var res = parseText(value, delimiters);
@@ -3538,6 +3591,8 @@
             );
           }
         }
+
+        // 把属性添加到ast的element上 Chang-Jin 2019-11-13
         addAttr(el, name, JSON.stringify(value), list[i]);
         // #6887 firefox doesn't update muted state if set via attribute
         // even immediately after element creation
@@ -3931,12 +3986,23 @@
    *    create fresh nodes for them on each re-render;
    * 2. Completely skip them in the patching process.
    */
+
+  // 优化器的目标：遍历生成的模板AST树
+  // 并检测纯静态的子树，即永远不需要更改的DOM。
+  // 一旦检测到这些子树，我们就可以：
+  // 1.将它们提升为常数，这样我们就不再需要在每次重新渲染时为它们创建新的节点；
+  // 2.在修补过程中完全跳过它们。
   function optimize (root, options) {
     if (!root) { return }
+    // 判断传入的key是否为静态的 Chang-Jin 2019-11-13
     isStaticKey = genStaticKeysCached(options.staticKeys || '');
-    isPlatformReservedTag = options.isReservedTag || no;
+    isPlatformReservedTag = options.isReservedTag || no; // 是不是平台保留tag Chang-Jin 2019-11-13
+
+    // 标记所有的非静态节点 Chang-Jin 2019-11-13
     // first pass: mark all non-static nodes.
     markStatic(root);
+
+    // 标记静态根节点 Chang-Jin 2019-11-13
     // second pass: mark static roots.
     markStaticRoots(root, false);
   }
@@ -3961,6 +4027,8 @@
       ) {
         return
       }
+
+      // 对子元素进行处理 如果child不是静态的 则此节点也置为非静态的 Chang-Jin 2019-11-13
       for (var i = 0, l = node.children.length; i < l; i++) {
         var child = node.children[i];
         markStatic(child);
@@ -3980,14 +4048,25 @@
     }
   }
 
+  /**
+   * 标记静态根节点 Chang-Jin 2019-11-13
+   *
+   * @param {ASTNode} node ast
+   * @param {boolean} isInFor ast是否在for循环中
+   */
   function markStaticRoots (node, isInFor) {
+    // 只处理node.type === 1的结点
     if (node.type === 1) {
+      // 给node.static = true或node.once = true的结点添加node.staticInFor属性，值为传入的isInFor
       if (node.static || node.once) {
         node.staticInFor = isInFor;
       }
+
+      // 对于一个静态根结点，它不应该只包含静态文本，否则消耗会超过获得的收益，更好的做法让它每次渲染时都刷新。
       // For a node to qualify as a static root, it should have children that
       // are not just static text. Otherwise the cost of hoisting out will
       // outweigh the benefits and it's better off to just always render it fresh.
+      // !(node.children.length === 1 &&node.children[0].type === 3) // 不要只包含一个静态文本
       if (node.static && node.children.length && !(
         node.children.length === 1 &&
         node.children[0].type === 3
@@ -3997,11 +4076,15 @@
       } else {
         node.staticRoot = false;
       }
+
+      // 递归地对子节点进行标记
       if (node.children) {
         for (var i = 0, l = node.children.length; i < l; i++) {
           markStaticRoots(node.children[i], isInFor || !!node.for);
         }
       }
+
+      // 如果结点有if块，则对块儿内结点同样进行标记
       if (node.ifConditions) {
         for (var i$1 = 1, l$1 = node.ifConditions.length; i$1 < l$1; i$1++) {
           markStaticRoots(node.ifConditions[i$1].block, isInFor);
@@ -4011,19 +4094,19 @@
   }
 
   function isStatic (node) {
-    if (node.type === 2) { // expression
+    if (node.type === 2) { // expression 表达式
       return false
     }
-    if (node.type === 3) { // text
+    if (node.type === 3) { // text 文本
       return true
     }
     return !!(node.pre || (
-      !node.hasBindings && // no dynamic bindings
-      !node.if && !node.for && // not v-if or v-for or v-else
-      !isBuiltInTag(node.tag) && // not a built-in
-      isPlatformReservedTag(node.tag) && // not a component
-      !isDirectChildOfTemplateFor(node) &&
-      Object.keys(node).every(isStaticKey)
+      !node.hasBindings && // no dynamic bindings 没有动态属性
+      !node.if && !node.for && // not v-if or v-for or v-else 没有 v-if v-else v-for
+      !isBuiltInTag(node.tag) && // not a built-in 不是内置标签 slot component
+      isPlatformReservedTag(node.tag) && // not a component 是平台保留标签 HTML 和 SVG 中的标签
+      !isDirectChildOfTemplateFor(node) && // 不是template标签的直接子元素且没有包含在for循环中
+      Object.keys(node).every(isStaticKey) // 结点包含的属性只能有isStaticKey中指定的几个
     ))
   }
 
@@ -4241,7 +4324,7 @@
     this.dataGenFns = pluckModuleFunction(options.modules, 'genData');
     this.directives = extend(extend({}, baseDirectives), options.directives);
     var isReservedTag = options.isReservedTag || no;
-    this.maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
+    this.maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); }; // 是一个组件 或者 不标签名不是保留标签 Chang-Jin 2019-11-18
     this.onceId = 0;
     this.staticRenderFns = [];
     this.pre = false;
@@ -4281,12 +4364,14 @@
     } else {
       // component or element
       var code;
+
+      // el.component保存的是<component :is="xxx">标签上is指向的模板 Chang-Jin 2019-11-15
       if (el.component) {
         code = genComponent(el.component, el, state);
       } else {
         var data;
         if (!el.plain || (el.pre && state.maybeComponent(el))) {
-          data = genData$2(el, state);
+          data = genData$2(el, state); // genData 用来生成_c第二个参数--给元素添加的属性 Chang-Jin 2019-11-15
         }
 
         var children = el.inlineTemplate ? null : genChildren(el, state, true);
@@ -4301,6 +4386,13 @@
   }
 
   // hoist static sub-trees out
+  /**
+   * 处理静态节点
+   *
+   * @param {ASTElement} el AST元素
+   * @param {CodegenState} state
+   * @returns {string} 一个处理静态节点的render函数字符串
+   */
   function genStatic (el, state) {
     el.staticProcessed = true;
     // Some elements (templates) need to behave differently inside of a v-pre
@@ -4310,6 +4402,8 @@
     if (el.pre) {
       state.pre = el.pre;
     }
+
+    // 对静态根节点及其子内容单独分离出来处理。 Chang-Jin 2019-11-15
     state.staticRenderFns.push(("with(this){return " + (genElement(el, state)) + "}"));
     state.pre = originalPreState;
     return ("_m(" + (state.staticRenderFns.length - 1) + (el.staticInFor ? ',true' : '') + ")")
@@ -4446,7 +4540,7 @@
     }
     // attributes
     if (el.attrs) {
-      data += "attrs:" + (genProps(el.attrs)) + ",";
+      data += "attrs:" + (genProps(el.attrs)) + ","; // genProps把属性链接为字符串 Chang-Jin 2019-11-15
     }
     // DOM props
     if (el.props) {
@@ -4661,6 +4755,8 @@
         ? getNormalizationType(children, state.maybeComponent)
         : 0;
       var gen = altGenNode || genNode;
+
+      // 返回的字符串中对children依次执行getNode，并通过,相连
       return ("[" + (children.map(function (c) { return gen(c, state); }).join(',')) + "]" + (normalizationType$1 ? ("," + normalizationType$1) : ''))
     }
   }
@@ -4669,6 +4765,10 @@
   // 0: no normalization needed
   // 1: simple normalization needed (possible 1-level deep nested array)
   // 2: full normalization needed
+  // 确定子数组所需的归一化。
+  // 0：无需归一化
+  // 1：需要简单的归一化（可能的1级深度嵌套数组）
+  // 2：需要完全归一化
   function getNormalizationType (
     children,
     maybeComponent
@@ -4679,11 +4779,16 @@
       if (el.type !== 1) {
         continue
       }
+
+      // el需要归一化 用来判断级别
+      // el是if块，但块内元素有内容符合上述三个条件的 Chang-Jin 2019-11-18
       if (needsNormalization(el) ||
           (el.ifConditions && el.ifConditions.some(function (c) { return needsNormalization(c.block); }))) {
         res = 2;
         break
       }
+
+      // el是自定义组件或el是if块，但块内元素有自定义组件的 Chang-Jin 2019-11-18
       if (maybeComponent(el) ||
           (el.ifConditions && el.ifConditions.some(function (c) { return maybeComponent(c.block); }))) {
         res = 1;
@@ -4692,6 +4797,7 @@
     return res
   }
 
+  // el上有`v-for`或标签名是`template`或`slot` Chang-Jin 2019-11-18
   function needsNormalization (el) {
     return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
   }
@@ -4751,6 +4857,7 @@
     return ("_c(" + componentName + "," + (genData$2(el, state)) + (children ? ("," + children) : '') + ")")
   }
 
+  // 属性的键值用:对应，多个键值对用,隔开 Chang-Jin 2019-11-18
   function genProps (props) {
     var staticProps = "";
     var dynamicProps = "";
@@ -4764,6 +4871,8 @@
       }
     }
     staticProps = "{" + (staticProps.slice(0, -1)) + "}";
+
+    // 如果是动态类型则用_d包裹 Chang-Jin 2019-11-18
     if (dynamicProps) {
       return ("_d(" + staticProps + ",[" + (dynamicProps.slice(0, -1)) + "])")
     } else {
@@ -4963,6 +5072,7 @@
 
 
 
+  // 利用了new Function生成render函数 并catch错误。 Chang-Jin 2019-11-12
   function createFunction (code, errors) {
     try {
       return new Function(code)
@@ -4973,6 +5083,7 @@
   }
 
   function createCompileToFunctionFn (compile) {
+    // 缓存编译之后的模板，方便之后复用 Chang-Jin 2019-11-12
     var cache = Object.create(null);
 
     return function compileToFunctions (
@@ -5006,13 +5117,16 @@
       var key = options.delimiters
         ? String(options.delimiters) + template
         : template;
+
+      // 从缓存中获取编译结果，没有则调用compile函数来编译 Chang-Jin 2019-11-12
       if (cache[key]) {
         return cache[key]
       }
 
-      // compile
+      // compile 把模板编译为ast语法树和render字符串
       var compiled = compile(template, options);
 
+      // 非生产环境下，这里会抛出编译过程中产生的错误
       // check compilation errors/tips
       {
         if (compiled.errors && compiled.errors.length) {
@@ -5044,7 +5158,10 @@
       // turn code into functions
       var res = {};
       var fnGenErrors = [];
+
+      // 通过new Function的方式把render字符串 转化为 render函数 Chang-Jin 2019-11-12
       res.render = createFunction(compiled.render, fnGenErrors);
+
       res.staticRenderFns = compiled.staticRenderFns.map(function (code) {
         return createFunction(code, fnGenErrors)
       });
