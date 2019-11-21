@@ -122,12 +122,12 @@ const hooksToMerge = Object.keys(componentVNodeHooks)
  * @returns {(VNode | Array<VNode> | void)} 返回组件对应的VNode对象
  */
 export function createComponent(
-    Ctor: Class<Component> | Function | Object | void,
+    Ctor: Class< Component> | Function | Object | void,
     data: ? VNodeData,
     context: Component,
-    children: ? Array<VNode> ,
+    children: ? Array< VNode> ,
     tag ?: string
-): VNode | Array<VNode> | void {
+): VNode | Array< VNode> | void {
     // Ctor为空表示从context的components属性上没找到tag对应的属性 Chang-Jin 2019-11-19
     if (isUndef(Ctor)) {
         return

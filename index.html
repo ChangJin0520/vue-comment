@@ -11,29 +11,17 @@
 
 <body>
     <div id="app">
-        {{ msg }}
-        <tt1 name="chang"></tt1>
+        <p>{{message}}</p>
+        <button @click="message += 1 ">按钮</button>
     </div>
     <script type="text/javascript">
-        new Vue({
+        var vm = new Vue({
             el: '#app',
-            data() {
-                return {
-                    msg: 'message'
-                }
-            },
-            components: {
-                'tt1': {
-                    template: '<p>tt1{{ name }}</p>',
-                    props: {
-                        name: {
-                            type: String,
-                            default: 'jin'
-                        }
-                    }
-                }
+            data: {
+                message: '第一个vue实例'
             }
         })
+
     </script>
 </body>
 
