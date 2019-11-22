@@ -469,7 +469,7 @@ export function createPatchFunction(backend) {
         let oldEndVnode = oldChild[oldEndIndex]
         let newEndVnode = newChild[newEndIndex]
 
-        let oldKeyToIndex, idxInOld, vnodeToMove, refElm
+        let oldKeyToIndex, indexInOld, vnodeToMove, refElm
 
         // removeOnly is a special flag used only by <transition-group>
         // to ensure removed elements stay in correct relative positions
@@ -529,18 +529,19 @@ export function createPatchFunction(backend) {
                     oldKeyToIndex = createKeyToOldIndex(oldChild, oldStartIndex, oldEndIndex)
                 }
 
-                idxInOld = isDef(newStartVnode.key) ?
+                // 查询newStartVnode是否有key值，并查找oldKeyToIdx是否有相同的key
+                indexInOld = isDef(newStartVnode.key) ?
                     oldKeyToIndex[newStartVnode.key] :
                     findIndexInOld(newStartVnode, oldChild, oldStartIndex, oldEndIndex)
 
-                if (isUndef(idxInOld)) { // New element
+                if (isUndef(indexInOld)) { // New element
                     createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newChild, newStartIndex)
                 } else {
-                    vnodeToMove = oldChild[idxInOld]
+                    vnodeToMove = oldChild[indexInOld]
 
                     if (sameVnode(vnodeToMove, newStartVnode)) {
                         patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newChild, newStartIndex)
-                        oldChild[idxInOld] = undefined
+                        oldChild[indexInOld] = undefined
                         canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm)
                     } else {
                         // same key but different element. treat as new element
