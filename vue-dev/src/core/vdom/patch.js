@@ -378,7 +378,7 @@ export function createPatchFunction(backend) {
      * 添加节点的e父元素中
      *
      * @param {*} parentElm 父元素
-     * @param {*} refElm
+     * @param {*} refElm 插入位置后一位元素
      * @param {*} vnodes 一组节点
      * @param {*} startIndex 从哪个节点开始
      * @param {*} endIndex 到哪个节点结束
@@ -525,36 +525,52 @@ export function createPatchFunction(backend) {
             } else { // 上述情况都不满足 根据key值来复用元素
                 if (isUndef(oldKeyToIndex)) {
                     // 遍历oldChild数组，找出其中有key的对象
-                    // 以key为键，索引值为value，生成新的对象oldKeyToIdx
+                    // 以key为键，索引值为value，生成新的对象oldKeyToIndex
                     oldKeyToIndex = createKeyToOldIndex(oldChild, oldStartIndex, oldEndIndex)
                 }
 
-                // 查询newStartVnode是否有key值，并查找oldKeyToIdx是否有相同的key
+                // 查询新开始节点newStartVnode是否有key值
+                // 查找oldChild是否有相同的key 并取其index值
                 indexInOld = isDef(newStartVnode.key) ?
                     oldKeyToIndex[newStartVnode.key] :
                     findIndexInOld(newStartVnode, oldChild, oldStartIndex, oldEndIndex)
 
+                // 如果newStartVnode不在oldChild中 则创建新元素
                 if (isUndef(indexInOld)) { // New element
+                    // 注意此处第四个参数传的是oldStartVnode.elm 所以newStartVnode对应的新元素会插入到其之前
                     createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newChild, newStartIndex)
-                } else {
-                    vnodeToMove = oldChild[indexInOld]
+                } else { // newStartVnode在oldChild中
+                    vnodeToMove = oldChild[indexInOld] // 从oldChild中取出对应的对应的oldVnode
 
+                    // 如果节点相同
                     if (sameVnode(vnodeToMove, newStartVnode)) {
+                        // 复用dom元素 继续递归比较子节点
                         patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newChild, newStartIndex)
+
+                        // 重置oldChild中相对于的元素为undefined
                         oldChild[indexInOld] = undefined
+
                         canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm)
-                    } else {
+                    } else { // 如果节点不同
                         // same key but different element. treat as new element
+                        // 相同的key值 但是是不同的节点
+                        // 调用createElm方法创建新元素
                         createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newChild, newStartIndex)
                     }
                 }
+
+                // 更新newStartVnode
                 newStartVnode = newChild[++newStartIndex]
             }
         }
-        if (oldStartIndex > oldEndIndex) {
+
+        // 删除无用的旧结点的操作
+        if (oldStartIndex > oldEndIndex) { // oldChild中的元素全部复用
             refElm = isUndef(newChild[newEndIndex + 1]) ? null : newChild[newEndIndex + 1].elm
+            // 依次把newStartIdx和newEndIdx之间的元素插入到相应的位置
             addVnodes(parentElm, refElm, newChild, newStartIndex, newEndIndex, insertedVnodeQueue)
-        } else if (newStartIndex > newEndIndex) {
+        } else if (newStartIndex > newEndIndex) { // newCh中的元素全部复用
+            // 依次删除oldStartIdx和oldEndIdx之间的元素
             removeVnodes(oldChild, oldStartIndex, oldEndIndex)
         }
     }
