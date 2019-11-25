@@ -11,38 +11,19 @@
 
 <body>
     <div id="app">
-        <p>{{num}}</p>
-        <add :num1="num"></add>
+        <p @click.native="show">{{text}}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
-            el: '#app',
-            data() {
-                return {
-                    num: 'F2'
-                }
+            data: {
+                text: '要显示的文本'
             },
-            components: {
-                add: {
-                    data() {
-                        return {
-                            num: 1,
-                            get: 'get'
-                        }
-                    },
-                    props: {
-                        num1: String
-                    },
-                    template: '<div :class="get"><p>{{num + num1}}</p><button @click="add">按钮</button></div>',
-                    methods: {
-                        add() {
-                            this.num = this.num + 1;
-                        }
-                    }
+            methods: {
+                show() {
+                    alert(this.text);
                 }
             }
-        })
-
+        }).$mount('#app');
     </script>
 </body>
 
