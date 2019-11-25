@@ -10,8 +10,8 @@ import {
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
-  vm._events = Object.create(null)
-  vm._hasHookEvent = false
+  vm._events = Object.create(null) // 当前元素上绑定的自定义事件
+  vm._hasHookEvent = false // 标识是否有hook:开头的事件
   // init parent attached events
   const listeners = vm.$options._parentListeners
   if (listeners) {

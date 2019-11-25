@@ -16,8 +16,10 @@ export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
+    // 自增的id
     vm._uid = uid++
 
+    // 性能相关代码
     let startTag, endTag
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -27,12 +29,19 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // a flag to avoid this being observed
+    // 标示是vue对象，避免被observe
     vm._isVue = true
+
     // merge options
+    // 合并配置
+
+    // 当初始化组件的时候_isComponent为true
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
+      // 优化内部组件实例化
+      // 因为动态选项合并非常慢 并且没有内部组件选项需要特殊处理。
       initInternalComponent(vm, options)
     } else {
       vm.$options = mergeOptions(
@@ -41,14 +50,19 @@ export function initMixin (Vue: Class<Component>) {
         vm
       )
     }
+
+
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       initProxy(vm)
     } else {
-      vm._renderProxy = vm
+      vm._renderProxy = vm // Proxy代理对象
     }
+
     // expose real self
+    // 当前vm实例
     vm._self = vm
+
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)

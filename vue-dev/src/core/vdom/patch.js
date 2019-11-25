@@ -140,7 +140,7 @@ export function createPatchFunction(backend) {
     let creatingElmInVPre = 0
 
     /**
-     * 生产一个DOM元素
+     * 生成一个DOM元素
      *
      * @param {*} vnode 当前元素的VNode对象
      * @param {*} insertedVnodeQueue
@@ -529,7 +529,7 @@ export function createPatchFunction(backend) {
                     oldKeyToIndex = createKeyToOldIndex(oldChild, oldStartIndex, oldEndIndex)
                 }
 
-                // 查询新开始节点newStartVnode是否有key值
+                // 获取newStartVnode上的key值
                 // 查找oldChild是否有相同的key 并取其index值
                 indexInOld = isDef(newStartVnode.key) ?
                     oldKeyToIndex[newStartVnode.key] :
@@ -722,6 +722,7 @@ export function createPatchFunction(backend) {
         if (isTrue(initial) && isDef(vnode.parent)) {
             vnode.parent.data.pendingInsert = queue
         } else {
+            // dom插入到页面之后调用的insert
             for (let i = 0; i < queue.length; ++i) {
                 queue[i].data.hook.insert(queue[i])
             }

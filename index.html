@@ -12,17 +12,33 @@
 <body>
     <div id="app">
         <p>{{num}}</p>
-        <button @click="add">按钮</button>
+        <add :num1="num"></add>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
-            data: {
-                num: 1
+            data() {
+                return {
+                    num: 'F2'
+                }
             },
-            methods: {
-                add () {
-                    this.num = this.num + 1;
+            components: {
+                add: {
+                    data() {
+                        return {
+                            num: 1,
+                            get: 'get'
+                        }
+                    },
+                    props: {
+                        num1: String
+                    },
+                    template: '<div :class="get"><p>{{num + num1}}</p><button @click="add">按钮</button></div>',
+                    methods: {
+                        add() {
+                            this.num = this.num + 1;
+                        }
+                    }
                 }
             }
         })

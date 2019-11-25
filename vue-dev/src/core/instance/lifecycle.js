@@ -55,21 +55,26 @@ export function initLifecycle(vm: Component) {
         parent.$children.push(vm)
     }
 
+    // 用于自定义子组件中 指向父组件的实例
     vm.$parent = parent
+
+    // 指向根vm实例
     vm.$root = parent ? parent.$root : vm
 
+    // 当前组件的子组件实例数组
     vm.$children = []
+
     vm.$refs = {}
 
     vm._watcher = null
     vm._inactive = null
     vm._directInactive = false
-    vm._isMounted = false
-    vm._isDestroyed = false
-    vm._isBeingDestroyed = false
+    vm._isMounted = false // 标识是否已挂载
+    vm._isDestroyed = false // 标识是否已销毁
+    vm._isBeingDestroyed = false // 标识是否正在销毁
 }
 
-export function lifecycleMixin(Vue: Class< Component> ) {
+export function lifecycleMixin(Vue: Class<Component> ) {
     Vue.prototype._update = function(vnode: VNode, hydrating ?: boolean) {
         const vm: Component = this
         const prevEl = vm.$el
@@ -114,14 +119,21 @@ export function lifecycleMixin(Vue: Class< Component> ) {
         if (vm._isBeingDestroyed) {
             return
         }
+        // 调用beforeDestroy钩子函数
         callHook(vm, 'beforeDestroy')
+
+        // 通过vm._isBeingDestroyed来标识正在销毁，避免重复调用
         vm._isBeingDestroyed = true
+
         // remove self from parent
+        // 从父元素中删除当前元素。
         const parent = vm.$parent
         if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
             remove(parent.$children, vm)
         }
+
         // teardown watchers
+        // 销毁watcher
         if (vm._watcher) {
             vm._watcher.teardown()
         }
@@ -129,24 +141,38 @@ export function lifecycleMixin(Vue: Class< Component> ) {
         while (i--) {
             vm._watchers[i].teardown()
         }
+
         // remove reference from data ob
         // frozen object may not have observer.
+        // vm._data_的监听对象的vmCount减1
         if (vm._data.__ob__) {
             vm._data.__ob__.vmCount--
         }
+
         // call the last hook...
+        // 标识vm已销毁
         vm._isDestroyed = true
+
         // invoke destroy hooks on current rendered tree
+        // 销毁当前组件
         vm.__patch__(vm._vnode, null)
+
         // fire destroyed hook
+        // 调用destroyed钩子函数
         callHook(vm, 'destroyed')
+
         // turn off all instance listeners.
+        // 销毁事件
         vm.$off()
+
         // remove __vue__ reference
+        // 消除各种引用的资源
         if (vm.$el) {
             vm.$el.__vue__ = null
         }
+
         // release circular reference (#6759)
+        // 释放循环引用?
         if (vm.$vnode) {
             vm.$vnode.parent = null
         }
@@ -232,7 +258,7 @@ export function updateChildComponent(
     propsData: ? Object,
     listeners: ? Object,
     parentVnode: MountedComponentVNode,
-    renderChildren: ? Array< VNode>
+    renderChildren: ? Array<VNode>
 ) {
     if (process.env.NODE_ENV !== 'production') {
         isUpdatingChildComponent = true
@@ -240,10 +266,14 @@ export function updateChildComponent(
 
     // determine whether component has slot children
     // we need to do this before overwriting $options._renderChildren.
+    // 确定组件是否具有插槽子代，
+    // 我们需要在覆盖$ options._renderChildren之前执行此操作。
 
     // check if there are dynamic scopedSlots (hand-written or compiled but with
     // dynamic slot names). Static scoped slots compiled from template has the
     // "$stable" marker.
+    // 检查是否有动态scopedSlot（手写或编译的但具有动态插槽名称）。
+    // 从模板编译的静态作用域插槽具有“ $ stable”标记。
     const newScopedSlots = parentVnode.data.scopedSlots
     const oldScopedSlots = vm.$scopedSlots
     const hasDynamicScopedSlot = !!(
@@ -255,16 +285,19 @@ export function updateChildComponent(
     // Any static slot children from the parent may have changed during parent's
     // update. Dynamic scoped slots may also have changed. In such cases, a forced
     // update is necessary to ensure correctness.
+    // 父级的任何静态插槽子级可能在父级更新期间已更改。
+    // 动态范围的插槽也可能已更改。
+    // 在这种情况下，必须进行强制更新以确保正确性。
     const needsForceUpdate = !!(
-        renderChildren || // has new static slots
-        vm.$options._renderChildren || // has old static slots
+        renderChildren || // has new static slots 有新的静态插槽
+        vm.$options._renderChildren || // has old static slots 有旧的静态插槽
         hasDynamicScopedSlot
     )
 
+    // 更新vnode相关关系
     vm.$options._parentVnode = parentVnode
-    vm.$vnode = parentVnode // update vm's placeholder node without re-render
-
-    if (vm._vnode) { // update child tree's parent
+    vm.$vnode = parentVnode // update vm's placeholder node without re-render 更新vm的占位符节点，而无需重新渲染
+    if (vm._vnode) { // update child tree's parent 更新子树的父级
         vm._vnode.parent = parentVnode
     }
     vm.$options._renderChildren = renderChildren
@@ -272,10 +305,12 @@ export function updateChildComponent(
     // update $attrs and $listeners hash
     // these are also reactive so they may trigger child update if the child
     // used them during render
+    // 更新$attrs和$listeners哈希值也是响应式的
+    // 因此如果子代在渲染期间使用它们，它们可能会触发子代更新
     vm.$attrs = parentVnode.data.attrs || emptyObject
     vm.$listeners = listeners || emptyObject
 
-    // update props
+    // update props // 更新 props
     if (propsData && vm.$options.props) {
         toggleObserving(false)
         const props = vm._props
@@ -283,20 +318,21 @@ export function updateChildComponent(
         for (let i = 0; i < propKeys.length; i++) {
             const key = propKeys[i]
             const propOptions: any = vm.$options.props // wtf flow?
-            props[key] = validateProp(key, propOptions, propsData, vm)
+            props[key] = validateProp(key, propOptions, propsData, vm) // 对传递的数据类型等进行校验。
         }
         toggleObserving(true)
-        // keep a copy of raw propsData
+        // keep a copy of raw propsData 保留原始propsData的副本
         vm.$options.propsData = propsData
     }
 
-    // update listeners
+    // update listeners // 更新 listeners
     listeners = listeners || emptyObject
     const oldListeners = vm.$options._parentListeners
     vm.$options._parentListeners = listeners
     updateComponentListeners(vm, listeners, oldListeners)
 
     // resolve slots + force update if has children
+    // 处理slots并如果有子级强制更新
     if (needsForceUpdate) {
         vm.$slots = resolveSlots(renderChildren, parentVnode.context)
         vm.$forceUpdate()

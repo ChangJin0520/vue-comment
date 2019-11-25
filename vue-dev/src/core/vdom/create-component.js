@@ -39,8 +39,11 @@ import {
 } from 'weex/runtime/recycle-list/render-component-template'
 
 // inline hooks to be invoked on component VNodes during patch
+// patch执行期间在组件VNode上调用内联挂钩
 const componentVNodeHooks = {
     init(vnode: VNodeWithData, hydrating: boolean): ? boolean {
+        // 如果componentInstance存在 且 未被销毁 且 需要keepAlive
+        // 则直接调用prepatch
         if (
             vnode.componentInstance &&
             !vnode.componentInstance._isDestroyed &&
@@ -50,17 +53,25 @@ const componentVNodeHooks = {
             const mountedNode: any = vnode // work around flow
             componentVNodeHooks.prepatch(mountedNode, mountedNode)
         } else {
+            // vnode.componentInstance不存在 或 已经销毁 或 非keepAlive
+            // 则通过createComponentInstanceForVnode方法来创建新的Vue实例
             const child = vnode.componentInstance = createComponentInstanceForVnode(
                 vnode,
                 activeInstance
             )
+
+            // 调用vue实例上的$mount方法
             child.$mount(hydrating ? vnode.elm : undefined, hydrating)
         }
     },
 
+    // 调用prepatch钩子函数的前提，说明该自定义组件得到了复
+    // 也就是说该自定义组件本身没有被替换
+    // 我们只需要根据传入的props或者slots等来更新子模板的内容
     prepatch(oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
         const options = vnode.componentOptions
         const child = vnode.componentInstance = oldVnode.componentInstance
+
         updateChildComponent(
             child,
             options.propsData, // updated props
@@ -75,10 +86,13 @@ const componentVNodeHooks = {
             context,
             componentInstance
         } = vnode
+
+        // 如果未挂载则修改标识 并调用mounted钩子函数
         if (!componentInstance._isMounted) {
             componentInstance._isMounted = true
             callHook(componentInstance, 'mounted')
         }
+
         if (vnode.data.keepAlive) {
             if (context._isMounted) {
                 // vue-router#1212
@@ -86,6 +100,9 @@ const componentVNodeHooks = {
                 // change, so directly walking the tree here may call activated hooks
                 // on incorrect children. Instead we push them into a queue which will
                 // be processed after the whole patch process ended.
+                // 在更新期间，保持活动的组件的子组件可能会更改，
+                // 因此直接walking the tree可能会在不正确的子组件上调用激活的钩子。
+                // 相反，我们将它们推入队列，整个patch过程结束后将对其进行处理。
                 queueActivatedComponent(componentInstance)
             } else {
                 activateChildComponent(componentInstance, true /* direct */ )
@@ -97,7 +114,11 @@ const componentVNodeHooks = {
         const {
             componentInstance
         } = vnode
+
+        // 如果未销毁则进行销毁
         if (!componentInstance._isDestroyed) {
+            // 如果组件未keepAlive 则调用$destory进行销毁
+            // 否则对子组件进行deactivate处理
             if (!vnode.data.keepAlive) {
                 componentInstance.$destroy()
             } else {
@@ -122,12 +143,12 @@ const hooksToMerge = Object.keys(componentVNodeHooks)
  * @returns {(VNode | Array<VNode> | void)} 返回组件对应的VNode对象
  */
 export function createComponent(
-    Ctor: Class< Component> | Function | Object | void,
+    Ctor: Class<Component> | Function | Object | void,
     data: ? VNodeData,
     context: Component,
-    children: ? Array< VNode> ,
+    children: ? Array<VNode> ,
     tag ?: string
-): VNode | Array< VNode> | void {
+): VNode | Array<VNode> | void {
     // Ctor为空表示从context的components属性上没找到tag对应的属性 Chang-Jin 2019-11-19
     if (isUndef(Ctor)) {
         return
@@ -245,20 +266,23 @@ export function createComponent(
 }
 
 export function createComponentInstanceForVnode(
-    vnode: any, // we know it's MountedComponentVNode but flow doesn't
-    parent: any, // activeInstance in lifecycle state
+    vnode: any, // 我们知道它是MountedComponentVNode，但flow不知道
+    parent: any, // activeInstance处于生命周期状态
 ): Component {
     const options: InternalComponentOptions = {
         _isComponent: true,
         _parentVnode: vnode,
         parent
     }
-    // check inline-template render functions
+
+    // 校验内联模板渲染功能
     const inlineTemplate = vnode.data.inlineTemplate
     if (isDef(inlineTemplate)) {
         options.render = inlineTemplate.render
         options.staticRenderFns = inlineTemplate.staticRenderFns
     }
+
+    // 调用new vnodeComponentOptions.Ctor(options)来创建一个新的Vue实例
     return new vnode.componentOptions.Ctor(options)
 }
 
