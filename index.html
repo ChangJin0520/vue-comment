@@ -11,7 +11,7 @@
 
 <body>
     <div id="app">
-        <p @click.native="show">{{text}}</p>
+        <p @click.enter="show(1)">{{text}}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
@@ -19,8 +19,8 @@
                 text: '要显示的文本'
             },
             methods: {
-                show() {
-                    alert(this.text);
+                show(i) {
+                    alert(this.text + 'i');
                 }
             }
         }).$mount('#app');
