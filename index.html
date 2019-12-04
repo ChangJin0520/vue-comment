@@ -11,12 +11,30 @@
 
 <body>
     <div id="app">
-        <p @click.enter="show(1)">{{text}}</p>
+        <!-- <p @click.enter="show(1)">{{text}}</p>
+        <p v-text="text" v-if="see"></p>
+        <p v-html="html" v-show="see"></p>
+        <div v-pre>{{ text }}</div>
+        <input type="text" v-model="text"> -->
+        <div v-demo:foo.a.b="demo_value">123</div>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             data: {
-                text: '要显示的文本'
+                demo_value: 'demo',
+                see: true,
+                text: '要显示的文本',
+                html: '<span style="color: red">html</span>'
+            },
+            directives: {
+                demo: {
+                    bind: function() {
+                        console.log('bind');
+                    },
+                    inserted: function() {
+                        console.log('inserted')
+                    }
+                }
             },
             methods: {
                 show(i) {
@@ -24,6 +42,7 @@
                 }
             }
         }).$mount('#app');
+
     </script>
 </body>
 

@@ -240,11 +240,13 @@ export function genFor(
         '})'
 }
 
+// 编译AST的属性
 export function genData(el: ASTElement, state: CodegenState): string {
     let data = '{'
 
     // directives first.
     // directives may mutate the el's other properties before they are generated.
+    // 指令可能会在生成el的其他属性之前对其进行更改。
     const dirs = genDirectives(el, state)
     if (dirs) data += dirs + ','
 
@@ -334,31 +336,41 @@ export function genData(el: ASTElement, state: CodegenState): string {
 }
 
 function genDirectives(el: ASTElement, state: CodegenState): string | void {
-    const dirs = el.directives
-    if (!dirs) return
+    const dirs = el.directives // 获取ast上的directives数组
+
+    if (!dirs) return // 不存在则直接返回
+
     let res = 'directives:['
     let hasRuntime = false
     let i, l, dir, needRuntime
+
     for (i = 0, l = dirs.length; i < l; i++) {
         dir = dirs[i]
         needRuntime = true
+
+        // 判断指令是否已存在
         const gen: DirectiveFunction = state.directives[dir.name]
+
         if (gen) {
             // compile-time directive that manipulates AST.
             // returns true if it also needs a runtime counterpart.
+            // 操纵AST的编译时指令。
+            // 如果还需要运行时副本，则返回true。
             needRuntime = !!gen(el, dir, state.warn)
         }
+
         if (needRuntime) {
             hasRuntime = true
             res += `{name:"${dir.name}",rawName:"${dir.rawName}"${
-        dir.value ? `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : ''
-      }${
-        dir.arg ? `,arg:${dir.isDynamicArg ? dir.arg : `"${dir.arg}"`}` : ''
-      }${
-        dir.modifiers ? `,modifiers:${JSON.stringify(dir.modifiers)}` : ''
-      }},`
+                        dir.value ? `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : ''
+                    }${
+                        dir.arg ? `,arg:${dir.isDynamicArg ? dir.arg : `"${dir.arg}"`}` : ''
+                    }${
+                        dir.modifiers ? `,modifiers:${JSON.stringify(dir.modifiers)}` : ''
+                    }},`
         }
     }
+
     if (hasRuntime) {
         return res.slice(0, -1) + ']'
     }

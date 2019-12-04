@@ -78,7 +78,7 @@ let maybeComponent
 
 export function createASTElement(
     tag: string,
-    attrs: Array< ASTAttr> ,
+    attrs: Array<ASTAttr> ,
     parent: ASTElement | void
 ): ASTElement {
     return {
@@ -451,7 +451,7 @@ function processRawAttrs(el) {
     const list = el.attrsList
     const len = list.length
     if (len) {
-        const attrs: Array< ASTAttr> = el.attrs = new Array(len)
+        const attrs: Array<ASTAttr> = el.attrs = new Array(len)
         for (let i = 0; i < len; i++) {
             attrs[i] = {
                 name: list[i].name,
@@ -609,7 +609,7 @@ function processIfConditions(el, parent) {
     }
 }
 
-function findPrevElement(children: Array< any> ): ASTElement | void {
+function findPrevElement(children: Array<any> ): ASTElement | void {
     let i = children.length
     while (i--) {
         if (children[i].type === 1) {
@@ -923,20 +923,26 @@ function processAttrs(el) {
                 }
 
                 addHandler(el, name, value, modifiers, false, warn, list[i], isDynamic)
-            } else { // normal directives
+            } else { // normal directives 普通指令
                 name = name.replace(dirRE, '')
-                // parse arg
+
+                // parse arg 获取指令的参数
                 const argMatch = name.match(argRE)
                 let arg = argMatch && argMatch[1]
+
                 isDynamic = false
+
                 if (arg) {
                     name = name.slice(0, -(arg.length + 1))
+                    // 处理动态指令参数
                     if (dynamicArgRE.test(arg)) {
                         arg = arg.slice(1, -1)
                         isDynamic = true
                     }
                 }
-                addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i])
+
+                addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i]) // 添加指令到el.directives上
+
                 if (process.env.NODE_ENV !== 'production' && name === 'model') {
                     checkForAliasModel(el, value)
                 }
@@ -992,7 +998,7 @@ function parseModifiers(name: string): Object | void {
     }
 }
 
-function makeAttrsMap(attrs: Array< Object> ): Object {
+function makeAttrsMap(attrs: Array<Object> ): Object {
     const map = {}
     for (let i = 0, l = attrs.length; i < l; i++) {
         if (
@@ -1037,6 +1043,7 @@ function guardIESVGBug(attrs) {
     return res
 }
 
+// v-model与v-for的校验
 function checkForAliasModel(el, value) {
     let _el = el
     while (_el) {
