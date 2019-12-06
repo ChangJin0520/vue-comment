@@ -207,6 +207,16 @@ function genIfConditions(
     }
 }
 
+/**
+ *
+ *
+ * @export
+ * @param {*} el AST
+ * @param {CodegenState} state
+ * @param {Function} [altGen]
+ * @param {string} [altHelper]
+ * @returns {string}
+ */
 export function genFor(
     el: any,
     state: CodegenState,
@@ -218,6 +228,7 @@ export function genFor(
     const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
     const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
 
+    // 生产环境下 如果是自定义元素且不是slot和template，则必须有el.key
     if (process.env.NODE_ENV !== 'production' &&
         state.maybeComponent(el) &&
         el.tag !== 'slot' &&
@@ -233,7 +244,10 @@ export function genFor(
         )
     }
 
-    el.forProcessed = true // avoid recursion
+    // 添加已处理标识
+    el.forProcessed = true // avoid recursion 防止递归
+
+    // 返回render字符串
     return `${altHelper || '_l'}((${exp}),` +
         `function(${alias}${iterator1}${iterator2}){` +
         `return ${(altGen || genElement)(el, state)}` +

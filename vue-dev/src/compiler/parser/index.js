@@ -537,8 +537,9 @@ export function processFor(el: ASTElement) {
     let exp
     if ((exp = getAndRemoveAttr(el, 'v-for'))) {
         const res = parseFor(exp)
+
         if (res) {
-            extend(el, res)
+            extend(el, res) // 把for相关的值绑到ast上
         } else if (process.env.NODE_ENV !== 'production') {
             warn(
                 `Invalid v-for expression: ${exp}`,
@@ -555,22 +556,33 @@ type ForParseResult = {
     iterator2 ?: string;
 };
 
+/**
+ *
+ *
+ * @export
+ * @param {string} exp (value, key, index) in object
+ * @returns {? ForParseResult} {alias: "value", for: "object", iterator1: "key", iterator2: "index"}
+ */
 export function parseFor(exp: string): ? ForParseResult {
+    // 匹配v-for的值 inMatch第2项是in/of左侧的值 第3项是右侧的值
     const inMatch = exp.match(forAliasRE)
     if (!inMatch) return
+
     const res = {}
     res.for = inMatch[2].trim()
-    const alias = inMatch[1].trim().replace(stripParensRE, '')
-    const iteratorMatch = alias.match(forIteratorRE)
+    const alias = inMatch[1].trim().replace(stripParensRE, '') // 去左侧值"(value, key, index)"的左右括号
+    const iteratorMatch = alias.match(forIteratorRE) // 获取"value, key, index"中的key和index
+
     if (iteratorMatch) {
-        res.alias = alias.replace(forIteratorRE, '').trim()
-        res.iterator1 = iteratorMatch[1].trim()
+        res.alias = alias.replace(forIteratorRE, '').trim() // 获取"value, key, index"中的value
+        res.iterator1 = iteratorMatch[1].trim() // 获取key
         if (iteratorMatch[2]) {
-            res.iterator2 = iteratorMatch[2].trim()
+            res.iterator2 = iteratorMatch[2].trim() // 获取index
         }
     } else {
         res.alias = alias
     }
+
     return res
 }
 

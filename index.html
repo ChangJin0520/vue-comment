@@ -11,37 +11,20 @@
 
 <body>
     <div id="app">
-        <!-- <p @click.enter="show(1)">{{text}}</p>
-        <p v-text="text" v-if="see"></p>
-        <p v-html="html" v-show="see"></p>
-        <div v-pre>{{ text }}</div>
-        <input type="text" v-model="text"> -->
-        <div v-demo:foo.a.b="demo_value">123</div>
+        <p v-for="(value, key, index) in object">{{ index }}. {{ key }} : {{ value }}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
+            el: '#app',
             data: {
-                demo_value: 'demo',
-                see: true,
-                text: '要显示的文本',
-                html: '<span style="color: red">html</span>'
-            },
-            directives: {
-                demo: {
-                    bind: function() {
-                        console.log('bind');
-                    },
-                    inserted: function() {
-                        console.log('inserted')
-                    }
-                }
-            },
-            methods: {
-                show(i) {
-                    alert(this.text + 'i');
+                object: {
+                    height: '178cm',
+                    weight: '80kg',
+                    gender: 'male',
+                    address: 'BeiJing'
                 }
             }
-        }).$mount('#app');
+        })
 
     </script>
 </body>
