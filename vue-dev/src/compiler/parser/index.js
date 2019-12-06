@@ -137,6 +137,8 @@ export function parse(
         // tree management
         if (!stack.length && element !== root) {
             // allow root elements with v-if, v-else-if and v-else
+            // 允许根节点上有v-if v-else-if和v-else
+            // 其实就是因为v-if v-else-if v-else都会处理为ifConditions数组的一项
             if (root.if && (element.elseif || element.else)) {
                 if (process.env.NODE_ENV !== 'production') {
                     checkRootConstraints(element)
@@ -156,6 +158,9 @@ export function parse(
             }
         }
         if (currentParent && !element.forbidden) {
+            // 当前AST上存在elseif属性或else属性为true 会处理当前ast
+            // 此时不处理标签的父子关系 children中只有v-if对应的标签
+            // 不会把v-else-if v-else对应的标签添加到父元素的children中
             if (element.elseif || element.else) {
                 processIfConditions(element, currentParent)
             } else {
@@ -586,18 +591,33 @@ export function parseFor(exp: string): ? ForParseResult {
     return res
 }
 
+// 处理v-if v-else-if v-else 三种情况 Chang-Jin 2019-12-06
 function processIf(el) {
     const exp = getAndRemoveAttr(el, 'v-if')
+
+    // el = {
+    //     ...
+    //     if: exp,
+    //     ifConditions: [{
+    //         exp: exp,
+    //         block: el
+    //     }]
+    //     ...
+    // }
     if (exp) {
-        el.if = exp
+        el.if = exp // 添加表达式到AST的if属性上
+
         addIfCondition(el, {
             exp: exp,
             block: el
         })
     } else {
+        // 存在v-else属性则在AST上添加else: true
         if (getAndRemoveAttr(el, 'v-else') != null) {
             el.else = true
         }
+
+        // 存在v-else-if属性则在AST上添加elseif: exp
         const elseif = getAndRemoveAttr(el, 'v-else-if')
         if (elseif) {
             el.elseif = elseif
@@ -607,7 +627,10 @@ function processIf(el) {
 
 function processIfConditions(el, parent) {
     const prev = findPrevElement(parent.children)
+
+    // 如果前一个ast是v-if 否则提示报错
     if (prev && prev.if) {
+        // 添加当前ast到ifCondition
         addIfCondition(prev, {
             exp: el.elseif,
             block: el
@@ -621,12 +644,15 @@ function processIfConditions(el, parent) {
     }
 }
 
+// 返回前一个元素
 function findPrevElement(children: Array<any> ): ASTElement | void {
     let i = children.length
+
     while (i--) {
         if (children[i].type === 1) {
             return children[i]
         } else {
+            // 如果前一个ast元素不是' ' 则会提示到控制台  v-if与v-else之间的元素会被删除
             if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
                 warn(
                     `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
@@ -634,15 +660,19 @@ function findPrevElement(children: Array<any> ): ASTElement | void {
                     children[i]
                 )
             }
+
+            // 删除该元素
             children.pop()
         }
     }
 }
 
+// 添加ifConditions数组到AST上
 export function addIfCondition(el: ASTElement, condition: ASTIfCondition) {
     if (!el.ifConditions) {
         el.ifConditions = []
     }
+
     el.ifConditions.push(condition)
 }
 

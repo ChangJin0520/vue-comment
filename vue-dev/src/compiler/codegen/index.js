@@ -172,38 +172,39 @@ export function genIf(
     altGen ?: Function,
     altEmpty ?: string
 ): string {
-    el.ifProcessed = true // avoid recursion
+    el.ifProcessed = true // avoid recursion 防止递归
     return genIfConditions(el.ifConditions.slice(), state, altGen, altEmpty)
 }
 
+// 返回类似"(value == 1)?_c('p',[_v("v-if块的内容")]):(value == 2)?_c('p',[_v("v-else-if块的内容")]):_c('p',[_v("v-else块的内容")])"的render字符串
 function genIfConditions(
     conditions: ASTIfConditions,
     state: CodegenState,
     altGen ?: Function,
     altEmpty ?: string
 ): string {
+    // 如果ifCondition数组为空 则直接返回一个'_e()'
     if (!conditions.length) {
         return altEmpty || '_e()'
     }
 
-    const condition = conditions.shift()
+    const condition = conditions.shift() // 取出第一个条件
+
+    // 返回一个三目运算符字符串
     if (condition.exp) {
-        return `(${condition.exp})?${
-      genTernaryExp(condition.block)
-    }:${
-      genIfConditions(conditions, state, altGen, altEmpty)
-    }`
+        return `(${condition.exp}) ?
+                ${genTernaryExp(condition.block)} :
+                ${genIfConditions(conditions, state, altGen, altEmpty)}`
     } else {
         return `${genTernaryExp(condition.block)}`
     }
 
     // v-if with v-once should generate code like (a)?_m(0):_m(1)
+    // v-if与v-once应该生成类似(a)?_m(0):_m(1)的代码
     function genTernaryExp(el) {
         return altGen ?
-            altGen(el, state) :
-            el.once ?
-            genOnce(el, state) :
-            genElement(el, state)
+        altGen(el, state) :
+        el.once ? genOnce(el, state) : genElement(el, state)
     }
 }
 
