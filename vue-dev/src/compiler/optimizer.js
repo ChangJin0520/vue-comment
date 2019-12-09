@@ -48,6 +48,7 @@ function genStaticKeys (keys: string): Function {
 
 function markStatic (node: ASTNode) {
   node.static = isStatic(node)
+
   if (node.type === 1) {
     // do not make component slot content static. this avoids
     // 1. components not able to mutate slot nodes

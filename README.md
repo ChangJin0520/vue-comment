@@ -52,5 +52,8 @@
 
 3. 注意这三个在ast中会和成一个, 添加到parent的children中.
 
+### v-once指令解析
+1. v-once其实更像一个标识作用，以在其他操作的时候进行特殊处理
+
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)

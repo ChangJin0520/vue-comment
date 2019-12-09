@@ -676,6 +676,7 @@ export function addIfCondition(el: ASTElement, condition: ASTIfCondition) {
     el.ifConditions.push(condition)
 }
 
+// 处理v-once指令 添加once属性到ast元素上
 function processOnce(el) {
     const once = getAndRemoveAttr(el, 'v-once')
     if (once != null) {

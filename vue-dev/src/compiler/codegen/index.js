@@ -140,12 +140,16 @@ function genStatic(el: ASTElement, state: CodegenState): string {
 
 // v-once
 function genOnce(el: ASTElement, state: CodegenState): string {
-    el.onceProcessed = true
-    if (el.if && !el.ifProcessed) {
+    el.onceProcessed = true // 在ast上添加onceProcessed标识
+
+    if (el.if && !el.ifProcessed) {// 如果和if一起使用 则调用genIf进行处理
+        // genIf中还会处理genOnce 说明genIf的处理比genOnce优先
         return genIf(el, state)
-    } else if (el.staticInFor) {
+    } else if (el.staticInFor) { // v-once用到v-for中
         let key = ''
         let parent = el.parent
+
+        // 遍历父级取key值
         while (parent) {
             if (parent.for) {
                 key = parent.key
@@ -153,15 +157,23 @@ function genOnce(el: ASTElement, state: CodegenState): string {
             }
             parent = parent.parent
         }
+
+        // key值不存在 则提示错误 并直接返回genElement到的render字符串
+        // 此时v-once其实是没用了
         if (!key) {
             process.env.NODE_ENV !== 'production' && state.warn(
                 `v-once can only be used inside v-for that is keyed. `,
                 el.rawAttrsMap['v-once']
             )
+
             return genElement(el, state)
         }
+
+        // key值存在则返回 _o包着的一个render字符串
+        // "_o(_c('p',[_v("v-once: "+_s(i))]),1,i)"
+        // state.onceId是因为v-for中可能包含多个v-once 用于给vnode生成唯一的key
         return `_o(${genElement(el, state)},${state.onceId++},${key})`
-    } else {
+    } else { // 不与if同用 且不再for中 则按静态节点处理
         return genStatic(el, state)
     }
 }
@@ -203,8 +215,8 @@ function genIfConditions(
     // v-if与v-once应该生成类似(a)?_m(0):_m(1)的代码
     function genTernaryExp(el) {
         return altGen ?
-        altGen(el, state) :
-        el.once ? genOnce(el, state) : genElement(el, state)
+            altGen(el, state) :
+            el.once ? genOnce(el, state) : genElement(el, state)
     }
 }
 
