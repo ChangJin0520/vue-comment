@@ -6,20 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <style>
+        .slide-enter {
+            transition: all .3s ease;
+        }
+
+        .slide-fade-enter-active {
+            transition: all .3s ease;
+        }
+
+        .slide-fade-leave-active {
+            transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+        }
+
+        .slide-fade-enter,
+        .slide-fade-leave-to {
+            transform: translateX(10px);
+            opacity: 0;
+        }
+
+    </style>
     <script src="/vue-dev/dist/vue.js"></script>
 </head>
 
 <body>
     <div id="app">
-        <div v-for="i in 4" :key="i">
-            <p v-once="true">v-once: {{ i }}</p>
-        </div>
+        <transition name="slide">
+            <p v-show="value">v-show</ass>
+        </transition>
+        <button @click="value = !value;">按钮</button>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
-            data: {
-                value: 2
+            data() {
+                return {
+                    value: true
+                }
             }
         })
 

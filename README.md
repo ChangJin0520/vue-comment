@@ -54,6 +54,18 @@
 
 ### v-once指令解析
 1. v-once其实更像一个标识作用，以在其他操作的时候进行特殊处理
+2. ast阶段会把once指令解析为ast上的once:true属性
+3. 在genOnce中大概有三种情况
+   1. if 如果once与if同用，则优先处理if指令，if指令中再调用genOnce就走到第三种情况了
+   2. for 在for上使用的时候，重点关注是否使用了key属性；为添加key则按普通处理，添加了key则用_o包裹生成的内容;
+   3. 普通 和静态节点一样处理 genStatic
+4. vnode阶段  
+   v-once只解析一次，此后按静态元素处理；  
+   _o执行的时候其实就是给vnode上添加了key属性,再执行个node.isStatic = true  node.isOnce = true
+
+### v-show指令解析
+1. v-show指令主要作用在vnode上
+2. 其根据`value的值`来控制元素的display属性；如果有`过渡效果`则调用entry，leave添加过渡效果。
 
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)
