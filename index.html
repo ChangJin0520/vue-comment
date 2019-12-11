@@ -16,7 +16,9 @@
 
 <body>
     <div id="app">
-        <p v-cloak>{{value}}</p>
+        <p v-pre data-link="1s">
+            <a href="http://www.baidu.com">{{value}}</a>
+        </p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
@@ -24,6 +26,11 @@
             data() {
                 return {
                     value: '祖国统一'
+                }
+            },
+            methods: {
+                log: function(s) {
+                    console.log(s)
                 }
             }
         })

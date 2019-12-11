@@ -136,5 +136,10 @@ el = {
 2. 重新render出来的DOM不再有此属性
 配合`[v-cloak] { display: none }`, 在页面展示前把带有`v-cloak`的元素隐藏
 
+### v-pre
+1. ast  
+   当解析到v-pre指令的时候会在ast上添加pre: true; 同时会设置inVPre为true, inVPre为true时, 会限制对文本的解析;  
+   当处理当前元素end时, 会把inVPre设为false, 结束限制
+
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)
