@@ -130,5 +130,11 @@ el = {
 ### v-html解析
 和v-texet类似，把text变为html，textContent变为innerHTML大概就是v-html的处理过程了
 
+### v-cloak
+1. ast
+   还是会解析为各种ast上的属性的, 但是不做处理
+2. 重新render出来的DOM不再有此属性
+配合`[v-cloak] { display: none }`, 在页面展示前把带有`v-cloak`的元素隐藏
+
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)

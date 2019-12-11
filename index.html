@@ -7,32 +7,16 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <style>
-        .slide-enter {
-            transition: all .3s ease;
+        [v-cloak] {
+            display: none;
         }
-
-        .slide-fade-enter-active {
-            transition: all .3s ease;
-        }
-
-        .slide-fade-leave-active {
-            transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
-        }
-
-        .slide-fade-enter,
-        .slide-fade-leave-to {
-            transform: translateX(10px);
-            opacity: 0;
-        }
-
     </style>
     <script src="/vue-dev/dist/vue.js"></script>
 </head>
 
 <body>
     <div id="app">
-        <span v-text="value"></span>
-        <!-- <p>{{value}}</p> -->
+        <p v-cloak>{{value}}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
