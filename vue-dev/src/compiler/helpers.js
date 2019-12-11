@@ -26,6 +26,7 @@ export function pluckModuleFunction < F: Function > (
         modules.map(m => m[key]).filter(_ => _) : []
 }
 
+// 把标签上的属性等转化为属性添加到ast上的props属性中
 export function addProp(el: ASTElement, name: string, value: string, range ?: Range, dynamic ?: boolean) {
     (el.props || (el.props = [])).push(rangeSetItem({
         name,

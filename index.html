@@ -31,17 +31,15 @@
 
 <body>
     <div id="app">
-        <transition name="slide">
-            <p v-show="value">v-show</ass>
-        </transition>
-        <button @click="value = !value;">按钮</button>
+        <span v-text="value"></span>
+        <p>{{value}}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
             data() {
                 return {
-                    value: true
+                    value: '祖国统一'
                 }
             }
         })

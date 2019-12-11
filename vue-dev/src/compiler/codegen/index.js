@@ -142,7 +142,7 @@ function genStatic(el: ASTElement, state: CodegenState): string {
 function genOnce(el: ASTElement, state: CodegenState): string {
     el.onceProcessed = true // 在ast上添加onceProcessed标识
 
-    if (el.if && !el.ifProcessed) {// 如果和if一起使用 则调用genIf进行处理
+    if (el.if && !el.ifProcessed) { // 如果和if一起使用 则调用genIf进行处理
         // genIf中还会处理genOnce 说明genIf的处理比genOnce优先
         return genIf(el, state)
     } else if (el.staticInFor) { // v-once用到v-for中
@@ -300,11 +300,14 @@ export function genData(el: ASTElement, state: CodegenState): string {
     for (let i = 0; i < state.dataGenFns.length; i++) {
         data += state.dataGenFns[i](el)
     }
+
     // attributes
     if (el.attrs) {
         data += `attrs:${genProps(el.attrs)},` // genProps把属性链接为字符串 Chang-Jin 2019-11-15
     }
+
     // DOM props
+    // 处理DOM上的属性
     if (el.props) {
         data += `domProps:${genProps(el.props)},`
     }
@@ -376,8 +379,9 @@ function genDirectives(el: ASTElement, state: CodegenState): string | void {
         needRuntime = true
 
         // 判断指令是否已存在
-        const gen: DirectiveFunction = state.directives[dir.name]
+        const gen: DirectiveFunction = state.directives[dir.name] // state.directives 默认包括bind cloak html model on text
 
+        // 如果指令已存在 判断其是否需要运行时
         if (gen) {
             // compile-time directive that manipulates AST.
             // returns true if it also needs a runtime counterpart.
@@ -388,13 +392,18 @@ function genDirectives(el: ASTElement, state: CodegenState): string | void {
 
         if (needRuntime) {
             hasRuntime = true
-            res += `{name:"${dir.name}",rawName:"${dir.rawName}"${
-                        dir.value ? `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : ''
-                    }${
-                        dir.arg ? `,arg:${dir.isDynamicArg ? dir.arg : `"${dir.arg}"`}` : ''
-                    }${
-                        dir.modifiers ? `,modifiers:${JSON.stringify(dir.modifiers)}` : ''
-                    }},`
+            res += `{
+                name:"${dir.name}",
+                rawName:"${dir.rawName}"
+                ${dir.value ?
+                    `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : 
+                    ''}
+                ${dir.arg ?
+                    `,arg:${dir.isDynamicArg ? dir.arg : `"${dir.arg}"`}` :
+                    ''}
+                ${dir.modifiers ?
+                    `,modifiers:${JSON.stringify(dir.modifiers)}` :
+                    ''}},`
         }
     }
 
@@ -661,21 +670,24 @@ function genComponent(
   })`
 }
 
-// 属性的键值用:对应，多个键值对用,隔开 Chang-Jin 2019-11-18
+// 把Props数组的值转化为键值形式的render字符串 例: "{"textContent":_s(value)}" Chang-Jin 2019-11-18
 function genProps(props: Array<ASTAttr> ): string {
     let staticProps = ``
     let dynamicProps = ``
+
     for (let i = 0; i < props.length; i++) {
         const prop = props[i]
         const value = __WEEX__ ?
             generateValue(prop.value) :
             transformSpecialNewlines(prop.value)
+
         if (prop.dynamic) {
             dynamicProps += `${prop.name},${value},`
         } else {
             staticProps += `"${prop.name}":${value},`
         }
     }
+
     staticProps = `{${staticProps.slice(0, -1)}}`
 
     // 如果是动态类型则用_d包裹 Chang-Jin 2019-11-18
