@@ -67,5 +67,68 @@
 1. v-show指令主要作用在vnode上
 2. 其根据`value的值`来控制元素的display属性；如果有`过渡效果`则调用entry，leave添加过渡效果。
 
+### v-text指令解析
+```html
+<!-- value = '祖国统一' -->
+<span v-text="value"></span>
+```
+1. ast  
+   会把v-text处理为ast上的el.directives数组中的一项  
+   然后经过prop处理会添加到el.props中的一项值会被修改为"_s(value)"
+``` js
+el = {
+    ....
+    attrsList: [{
+        end: 43,
+        name: "v-text",
+        start: 29,
+        value: "value"
+    }],
+    attrsMap: {
+        v-text: "value"
+    },
+    directives: [{
+        arg: null,
+        end: 43,
+        isDynamicArg: false,
+        modifiers: undefined,
+        name: "text",
+        rawName: "v-text",
+        start: 29,
+        value: "value"
+    }],
+    rawAttrsMap: {
+        v-text: {name: "v-text", value: "value", start: 29, end: 43}
+    },
+    props: [{
+        dynamic: undefined,
+        end: 43,
+        name: "textContent",
+        start: 29,
+        value: "_s(value)"
+    }]
+    ....
+}
+```
+2. render字符串  
+   通过genData被转化为"{domProps:{"textContent":_s(value)}}"
+3. vnode  
+```js
+// VNode
+{
+    ....
+    data: {
+        domProps: {
+            textContent: "祖国统一"
+        }
+    }
+    ....
+}
+```
+4. updateDOMProps
+
+### v-html解析
+和v-texet类似，把text变为html，textContent变为innerHTML大概就是v-html的处理过程了
+
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)
