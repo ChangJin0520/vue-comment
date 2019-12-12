@@ -142,11 +142,15 @@ el = {
    当处理当前元素end时, 会把inVPre设为false, 结束限制
 
 ### v-model
-* 修饰符
+#### 修饰符
   * number -> _n(value)
   * lazy -> 使用input事件替代change事件
   * trim
 
+#### v-model处理的大致流程:
+parse -> genDirectives -> gen(model) -> genCheckboxModel/ -> addProp -> addHandler -> genProps --> updateDOMProps
+
+#### type
 1. select
    1. ast  
       和其他的指令处理没啥区别; 多了一个v-for判断, v-model不能与v-for一起使用
@@ -166,5 +170,34 @@ el = {
       inserted上会根据value setSelected更新界面DOM的值.  
       componentUpdated上也会setSelected更新界面DOM的值; 如果option是用v-for添加的, 也会在这里更新.
 
+2. checkbox
+   1. ast
+      主要是关注处理后的props
+      ```js
+        props: [{
+            checked: "Array.isArray(value)?_i(value,null)>-1:_q(value,"yes")"
+        }]
+      ```
+      还有添加到input上的事件回调
+      ```js
+      var $$a = value,
+        $$el = $event.target,
+        $$c = $$el.checked ? (trueValueBinding) : (falseValueBinding);
+
+        if(Array.isArray($$a)){
+            var $$v = number ? '_n(' + valueBinding + ')' : valueBinding,
+            $$i = _i($$a,$$v);
+
+            if ($$c) {
+                ($$i < 0 && value = $$a.concat($$v))
+            } else {
+                $$i > -1 && value = $$a.slice(0,$$i).concat($$a.slice($$i+1)))
+            }
+        } else {
+            value = $$c
+        }
+      ```
+
+3. radio
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)

@@ -39,8 +39,9 @@ function normalizeEvents(on) {
     }
     // This was originally intended to fix #4521 but no longer necessary
     // after 2.5. Keeping it for backwards compat with generated code from < 2.4
-    // 最初旨在修复#4521，但在2.5之后不再需要。 
+    // 最初旨在修复#4521，但在2.5之后不再需要。
     // 与<2.4生成的代码保持向后兼容
+    // 原来是用在checkboxl和radio的v-mode指令上
     /* istanbul ignore if */
     if (isDef(on[CHECKBOX_RADIO_TOKEN])) {
         on.change = [].concat(on[CHECKBOX_RADIO_TOKEN], on.change || [])
