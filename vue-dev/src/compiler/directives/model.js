@@ -3,46 +3,51 @@
 /**
  * Cross-platform code generation for component v-model
  */
-export function genComponentModel (
-  el: ASTElement,
-  value: string,
-  modifiers: ?ASTModifiers
-): ?boolean {
-  const { number, trim } = modifiers || {}
+export function genComponentModel(
+    el: ASTElement,
+    value: string,
+    modifiers: ? ASTModifiers
+): ? boolean {
+    const {
+        number,
+        trim
+    } = modifiers || {}
 
-  const baseValueExpression = '$$v'
-  let valueExpression = baseValueExpression
-  if (trim) {
-    valueExpression =
-      `(typeof ${baseValueExpression} === 'string'` +
-      `? ${baseValueExpression}.trim()` +
-      `: ${baseValueExpression})`
-  }
-  if (number) {
-    valueExpression = `_n(${valueExpression})`
-  }
-  const assignment = genAssignmentCode(value, valueExpression)
+    const baseValueExpression = '$$v'
+    let valueExpression = baseValueExpression
+    if (trim) {
+        valueExpression =
+            `(typeof ${baseValueExpression} === 'string'` +
+            `? ${baseValueExpression}.trim()` +
+            `: ${baseValueExpression})`
+    }
+    if (number) {
+        valueExpression = `_n(${valueExpression})`
+    }
+    const assignment = genAssignmentCode(value, valueExpression)
 
-  el.model = {
-    value: `(${value})`,
-    expression: JSON.stringify(value),
-    callback: `function (${baseValueExpression}) {${assignment}}`
-  }
+    el.model = {
+        value: `(${value})`,
+        expression: JSON.stringify(value),
+        callback: `function (${baseValueExpression}) {${assignment}}`
+    }
 }
 
 /**
  * Cross-platform codegen helper for generating v-model value assignment code.
+ * 跨平台的代码生成助手，用于生成v-model值分配代码。
  */
-export function genAssignmentCode (
-  value: string,
-  assignment: string
+export function genAssignmentCode(
+    value: string,
+    assignment: string
 ): string {
-  const res = parseModel(value)
-  if (res.key === null) {
-    return `${value}=${assignment}`
-  } else {
-    return `$set(${res.exp}, ${res.key}, ${assignment})`
-  }
+    const res = parseModel(value)
+
+    if (res.key === null) {
+        return `${value}=${assignment}`
+    } else {
+        return `$set(${res.exp}, ${res.key}, ${assignment})`
+    }
 }
 
 /**
@@ -63,86 +68,87 @@ export function genAssignmentCode (
 let len, str, chr, index, expressionPos, expressionEndPos
 
 type ModelParseResult = {
-  exp: string,
-  key: string | null
+    exp: string,
+    key: string | null
 }
 
-export function parseModel (val: string): ModelParseResult {
-  // Fix https://github.com/vuejs/vue/pull/7730
-  // allow v-model="obj.val " (trailing whitespace)
-  val = val.trim()
-  len = val.length
+export function parseModel(val: string): ModelParseResult {
+    // Fix https://github.com/vuejs/vue/pull/7730
+    // allow v-model="obj.val " (trailing whitespace)
+    val = val.trim()
+    len = val.length
 
-  if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
-    index = val.lastIndexOf('.')
-    if (index > -1) {
-      return {
-        exp: val.slice(0, index),
-        key: '"' + val.slice(index + 1) + '"'
-      }
-    } else {
-      return {
-        exp: val,
-        key: null
-      }
+    // 可以处理value、value.a、value['a']、value[0]等多种情况
+    if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
+        index = val.lastIndexOf('.')
+        if (index > -1) {
+            return {
+                exp: val.slice(0, index),
+                key: '"' + val.slice(index + 1) + '"'
+            }
+        } else {
+            return {
+                exp: val,
+                key: null
+            }
+        }
     }
-  }
 
-  str = val
-  index = expressionPos = expressionEndPos = 0
+    str = val
+    index = expressionPos = expressionEndPos = 0
 
-  while (!eof()) {
-    chr = next()
-    /* istanbul ignore if */
-    if (isStringStart(chr)) {
-      parseString(chr)
-    } else if (chr === 0x5B) {
-      parseBracket(chr)
+    while (!eof()) {
+        chr = next()
+        /* istanbul ignore if */
+        if (isStringStart(chr)) {
+            parseString(chr)
+        } else if (chr === 0x5B) {
+            parseBracket(chr)
+        }
     }
-  }
 
-  return {
-    exp: val.slice(0, expressionPos),
-    key: val.slice(expressionPos + 1, expressionEndPos)
-  }
-}
-
-function next (): number {
-  return str.charCodeAt(++index)
-}
-
-function eof (): boolean {
-  return index >= len
-}
-
-function isStringStart (chr: number): boolean {
-  return chr === 0x22 || chr === 0x27
-}
-
-function parseBracket (chr: number): void {
-  let inBracket = 1
-  expressionPos = index
-  while (!eof()) {
-    chr = next()
-    if (isStringStart(chr)) {
-      parseString(chr)
-      continue
+    return {
+        exp: val.slice(0, expressionPos),
+        key: val.slice(expressionPos + 1, expressionEndPos)
     }
-    if (chr === 0x5B) inBracket++
-    if (chr === 0x5D) inBracket--
-    if (inBracket === 0) {
-      expressionEndPos = index
-      break
-    }
-  }
 }
 
-function parseString (chr: number): void {
-  const stringQuote = chr
-  while (!eof()) {
-    chr = next()
-    if (chr === stringQuote) {
-      break
+function next(): number {
+    return str.charCodeAt(++index)
+}
+
+function eof(): boolean {
+    return index >= len
+}
+
+function isStringStart(chr: number): boolean {
+    return chr === 0x22 || chr === 0x27
+}
+
+function parseBracket(chr: number): void {
+    let inBracket = 1
+    expressionPos = index
+    while (!eof()) {
+        chr = next()
+        if (isStringStart(chr)) {
+            parseString(chr)
+            continue
+        }
+        if (chr === 0x5B) inBracket++
+        if (chr === 0x5D) inBracket--
+        if (inBracket === 0) {
+            expressionEndPos = index
+            break
+        }
     }
-  }
+}
+
+function parseString(chr: number): void {
+    const stringQuote = chr
+    while (!eof()) {
+        chr = next()
+        if (chr === stringQuote) {
+            break
+        }
+    }
 }

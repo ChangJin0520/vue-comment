@@ -987,6 +987,7 @@ function processAttrs(el) {
 
                 addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i]) // 添加指令到el.directives上
 
+                // v-model不与v-for同用
                 if (process.env.NODE_ENV !== 'production' && name === 'model') {
                     checkForAliasModel(el, value)
                 }

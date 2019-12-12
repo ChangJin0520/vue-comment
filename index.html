@@ -10,30 +10,28 @@
         [v-cloak] {
             display: none;
         }
+
     </style>
     <script src="/vue-dev/dist/vue.js"></script>
 </head>
 
 <body>
     <div id="app">
-        <p v-pre data-link="1s">
-            <a href="http://www.baidu.com">{{value}}</a>
-        </p>
+        <select v-model.number="value.a">
+            <option v-for="o in options" :key="o">{{ o }}</option>
+        </select>
+        <p @click="options.push(9)">{{value}}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
-            data() {
-                return {
-                    value: '祖国统一'
-                }
-            },
-            methods: {
-                log: function(s) {
-                    console.log(s)
-                }
+            data: {
+                value: {
+                    a: 2
+                },
+                options: [1, 2, 3]
             }
-        })
+        }).$mount('#app');
 
     </script>
 </body>

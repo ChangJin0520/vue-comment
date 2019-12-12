@@ -141,5 +141,30 @@ el = {
    当解析到v-pre指令的时候会在ast上添加pre: true; 同时会设置inVPre为true, inVPre为true时, 会限制对文本的解析;  
    当处理当前元素end时, 会把inVPre设为false, 结束限制
 
+### v-model
+* 修饰符
+  * number -> _n(value)
+  * lazy -> 使用input事件替代change事件
+  * trim
+
+1. select
+   1. ast  
+      和其他的指令处理没啥区别; 多了一个v-for判断, v-model不能与v-for一起使用
+   2. render  
+      会给该select添加一个change事件, render阶段主要是根据v-model的值和修饰符拼一个事件回调函数;
+      ```js
+        // v-model="value.a"
+        var $$selectedVal = Array.prototype.filter.call($event.target.options, function(o){
+          return o.selected
+        }).map(function(o){
+          var val = "_value" in o ? o._value : o.value;
+          return val
+        });
+        $set(value, "a", $event.target.multiple ? $$selectedVal : $$selectedVal[0])
+      ```
+   3. DOM  
+      inserted上会根据value setSelected更新界面DOM的值.  
+      componentUpdated上也会setSelected更新界面DOM的值; 如果option是用v-for添加的, 也会在这里更新.
+
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)
