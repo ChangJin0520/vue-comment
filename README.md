@@ -199,5 +199,44 @@ parse -> genDirectives -> gen(model) -> genCheckboxModel/ -> addProp -> addHandl
       ```
 
 3. radio
+    1. ast
+       和其他的差不多
+       ```js
+       props: [{
+           name: "checked",
+           value: "_q(value,"1")"
+       }]
+
+       // 事件回调
+       value = "1"
+       ```
+    2. render
+       domProps:{"checked":_q(value,"1")}
+
+4. 其他类型的input textarea
+主要处理逻辑:  
+   1. 根据lazy判断需要绑定的事件类型, lazy绑定change事件, 否则绑定input事件
+   2. 处理trim
+   3. 添加对输入法模式的处理
+   4. ast上添加props属性
+      ```js
+      props: [{
+          name: "value",
+          vlaue: "(value)"
+      }]
+      ```
+    5. 添加事件处理
+      ```js
+      events: [{
+        input: {
+            dynamic: undefined,
+            value: "if($event.target.composing)return;value=$event.target.value"
+        },
+        blur: {
+            value: "$forceUpdate()"
+        }
+      }]
+      ```
+    6. trim和number的情况, 还会添加blur事件
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)

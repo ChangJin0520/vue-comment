@@ -60,7 +60,7 @@ function updateDOMProps(oldVnode: VNodeWithData, vnode: VNodeWithData) {
             }
         }
 
-        if (key === 'value' && elm.tagName !== 'PROGRESS') { // 处理进度条progress上的value属性
+        if (key === 'value' && elm.tagName !== 'PROGRESS') {
             // store value as _value as well since
             // non-string values will be stringified
             // 也将值存储为_value

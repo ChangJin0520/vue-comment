@@ -11,7 +11,7 @@
 
 <body>
     <div id="app">
-        <input type="checkbox" v-model="value" true-value="yes" false-value="0" />
+        <input type="text" v-model="value" />
         <p>{{value}}</p>
     </div>
     <script>
@@ -21,7 +21,6 @@
                 value: 1
             }
         }).$mount('#app');
-
     </script>
 </body>
 

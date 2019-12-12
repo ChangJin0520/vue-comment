@@ -148,6 +148,7 @@ function genDefaultModel(
 
     // warn if v-bind:value conflicts with v-model
     // except for inputs with v-bind:type
+    // 如果v-bind：value与v-model冲突，则发出警告，但带有v-bind：type的输入除外
     if (process.env.NODE_ENV !== 'production') {
         const value = el.attrsMap['v-bind:value'] || el.attrsMap[':value']
         const typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
@@ -166,28 +167,38 @@ function genDefaultModel(
         number,
         trim
     } = modifiers || {}
+
     const needCompositionGuard = !lazy && type !== 'range'
+    // 根据lazy修饰符判断绑定什么事件
     const event = lazy ?
         'change' :
-        type === 'range' ?
-        RANGE_TOKEN :
-        'input'
+        type === 'range' ? RANGE_TOKEN : 'input'
 
     let valueExpression = '$event.target.value'
+
+    // 处理trim修饰符
     if (trim) {
         valueExpression = `$event.target.value.trim()`
     }
+
     if (number) {
         valueExpression = `_n(${valueExpression})`
     }
 
     let code = genAssignmentCode(value, valueExpression)
+
+    // 处理输入法模式情况
     if (needCompositionGuard) {
         code = `if($event.target.composing)return;${code}`
     }
 
+    // 添加prop
     addProp(el, 'value', `(${value})`)
+
+    // 添加事件
     addHandler(el, event, code, null, true)
+
+    // 如果使用了trim和number添加blur事件
     if (trim || number) {
         addHandler(el, 'blur', '$forceUpdate()')
     }
