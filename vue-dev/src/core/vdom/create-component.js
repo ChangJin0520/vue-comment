@@ -199,7 +199,7 @@ export function createComponent(
     resolveConstructorOptions(Ctor)
 
     // transform component v-model data into props & events
-    // 对元素上v-model指令的处理
+    // 对自定义组件上v-model指令的处理
     if (isDef(data.model)) {
         transformModel(Ctor.options, data)
     }

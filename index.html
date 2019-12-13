@@ -11,16 +11,28 @@
 
 <body>
     <div id="app">
-        <input type="text" v-model="value" />
+        <my-component v-model="value"></my-component>
         <p>{{value}}</p>
     </div>
     <script>
         var vm = new Vue({
             el: '#app',
             data: {
-                value: 1
+                value: "哈哈"
+            },
+            components: {
+                myComponent: {
+                    template: '<p @click="change">子组件{{value}}</p>',
+                    props: ['value'],
+                    methods: {
+                        change: function() {
+                            this.$emit('input', "呵呵");
+                        }
+                    }
+                }
             }
         }).$mount('#app');
+
     </script>
 </body>
 

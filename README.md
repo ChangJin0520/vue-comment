@@ -148,7 +148,7 @@ el = {
   * trim
 
 #### v-model处理的大致流程:
-parse -> genDirectives -> gen(model) -> genCheckboxModel/ -> addProp -> addHandler -> genProps --> updateDOMProps
+parse -> genDirectives -> gen(model) -> genCheckboxModel/... -> addProp -> addHandler -> genProps --> updateDOMProps
 
 #### type
 1. select
@@ -238,5 +238,33 @@ parse -> genDirectives -> gen(model) -> genCheckboxModel/ -> addProp -> addHandl
       }]
       ```
     6. trim和number的情况, 还会添加blur事件
+    7. updateDOMProps
+
+5. v-model用到自定义组件上
+    ```html
+    <!-- value: "哈哈" -->
+    <my-component v-model="value"></my-component>
+    ```
+    1. ast  
+        把自定义组件上的v-model属性解析为el.model
+        ```js
+        // v-model="value"
+        el.model = {
+            callback: "function ($$v) {value=$$v}",
+            expression: ""value"",
+            value: "(value)"
+        }
+        ```
+    2. render  
+        "_c('my-component',{model:{value:(value),callback:function ($$v) {value=$$v},expression:"value"}})"
+    3. _c createComponent  
+        生成组件阶段会把model进行转换, 最终会变为ast上的componentOptions的属性
+        ```js
+        componentOptions: {
+            listeners: {input: function ($$v) {value=$$v}},
+            propsData: {value: "哈哈"}
+        }
+        ```
+        自定义组件的model event属性用来设置事件类型 默认为input prop属性用来设置v-model的值以何标识符传入自定义组件中
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)
