@@ -4,47 +4,60 @@ import type VNode from 'core/vdom/vnode'
 
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
+ * 用于把原始子元素VNodes解析为slot对象的运行时助手
  */
-export function resolveSlots (
-  children: ?Array<VNode>,
-  context: ?Component
-): { [key: string]: Array<VNode> } {
-  if (!children || !children.length) {
-    return {}
-  }
-  const slots = {}
-  for (let i = 0, l = children.length; i < l; i++) {
-    const child = children[i]
-    const data = child.data
-    // remove slot attribute if the node is resolved as a Vue slot node
-    if (data && data.attrs && data.attrs.slot) {
-      delete data.attrs.slot
+export function resolveSlots(
+    children: ? Array<VNode> ,
+    context: ? Component
+): {
+    [key: string]: Array<VNode>
+} {
+    if (!children || !children.length) {
+        return {}
     }
-    // named slots should only be respected if the vnode was rendered in the
-    // same context.
-    if ((child.context === context || child.fnContext === context) &&
-      data && data.slot != null
-    ) {
-      const name = data.slot
-      const slot = (slots[name] || (slots[name] = []))
-      if (child.tag === 'template') {
-        slot.push.apply(slot, child.children || [])
-      } else {
-        slot.push(child)
-      }
-    } else {
-      (slots.default || (slots.default = [])).push(child)
+
+    const slots = {}
+    for (let i = 0, l = children.length; i < l; i++) {
+        const child = children[i]
+        const data = child.data
+
+        // remove slot attribute if the node is resolved as a Vue slot node
+        // 如果节点解析为Vue插槽节点，则删除插槽属性
+        if (data && data.attrs && data.attrs.slot) {
+            delete data.attrs.slot
+        }
+
+        // named slots should only be respected if the vnode was rendered in the
+        // same context.
+        // 仅当在同一上下文中呈现vnode时，才应使用命名插槽。
+        // 把插入内容根据命名进行分离
+        if ((child.context === context || child.fnContext === context) &&
+            data && data.slot != null
+        ) {
+            const name = data.slot
+            const slot = (slots[name] || (slots[name] = []))
+
+            if (child.tag === 'template') {
+                slot.push.apply(slot, child.children || [])
+            } else {
+                slot.push(child)
+            }
+        } else {
+            (slots.default || (slots.default = [])).push(child)
+        }
     }
-  }
-  // ignore slots that contains only whitespace
-  for (const name in slots) {
-    if (slots[name].every(isWhitespace)) {
-      delete slots[name]
+
+    // ignore slots that contains only whitespace
+    // 忽略仅包含空格的插槽
+    for (const name in slots) {
+        if (slots[name].every(isWhitespace)) {
+            delete slots[name]
+        }
     }
-  }
-  return slots
+
+    return slots
 }
 
-function isWhitespace (node: VNode): boolean {
-  return (node.isComment && !node.asyncFactory) || node.text === ' '
+function isWhitespace(node: VNode): boolean {
+    return (node.isComment && !node.asyncFactory) || node.text === ' '
 }

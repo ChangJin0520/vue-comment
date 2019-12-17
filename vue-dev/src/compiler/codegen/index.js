@@ -323,6 +323,7 @@ export function genData(el: ASTElement, state: CodegenState): string {
 
     // slot target
     // only for non-scoped slots
+    // 处理slot target
     if (el.slotTarget && !el.slotScope) {
         data += `slot:${el.slotTarget},`
     }
@@ -633,28 +634,35 @@ export function genComment(comment: ASTText): string {
     return `_e(${JSON.stringify(comment.text)})`
 }
 
+// 处理slot元素
 function genSlot(el: ASTElement, state: CodegenState): string {
     const slotName = el.slotName || '"default"'
-    const children = genChildren(el, state)
+    const children = genChildren(el, state) // 处理slot中的子元素
     let res = `_t(${slotName}${children ? `,${children}` : ''}`
     const attrs = el.attrs || el.dynamicAttrs ?
         genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(attr => ({
-            // slot props are camelized
+            // slot props are camelized 转化为驼峰式
             name: camelize(attr.name),
             value: attr.value,
             dynamic: attr.dynamic
         }))) :
         null
     const bind = el.attrsMap['v-bind']
+
     if ((attrs || bind) && !children) {
         res += `,null`
     }
+
+    // 处理slot上其他属性
     if (attrs) {
         res += `,${attrs}`
     }
+
+    // 处理slot上的bind
     if (bind) {
         res += `${attrs ? '' : ',null'},${bind}`
     }
+
     return res + ')'
 }
 

@@ -687,37 +687,41 @@ function processOnce(el) {
 
 // handle content being passed to a component as slot,
 // e.g. <template slot="xxx">, <div slot-scope="xxx">
+// 处理作为插槽传递到组件的内容
 function processSlotContent(el) {
     let slotScope
     if (el.tag === 'template') {
         slotScope = getAndRemoveAttr(el, 'scope')
+
         /* istanbul ignore if */
-        if (process.env.NODE_ENV !== 'production' && slotScope) {
-            warn(
-                `the "scope" attribute for scoped slots have been deprecated and ` +
-                `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
-                `can also be used on plain elements in addition to <template> to ` +
-                `denote scoped slots.`,
-                el.rawAttrsMap['scope'],
-                true
-            )
-        }
+        // if (process.env.NODE_ENV !== 'production' && slotScope) {
+        //     warn(
+        //         `the "scope" attribute for scoped slots have been deprecated and ` +
+        //         `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
+        //         `can also be used on plain elements in addition to <template> to ` +
+        //         `denote scoped slots.`,
+        //         el.rawAttrsMap['scope'],
+        //         true
+        //     )
+        // }
+
         el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
         /* istanbul ignore if */
-        if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
-            warn(
-                `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
-                `(v-for takes higher priority). Use a wrapper <template> for the ` +
-                `scoped slot to make it clearer.`,
-                el.rawAttrsMap['slot-scope'],
-                true
-            )
-        }
+        // if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+        //     warn(
+        //         `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
+        //         `(v-for takes higher priority). Use a wrapper <template> for the ` +
+        //         `scoped slot to make it clearer.`,
+        //         el.rawAttrsMap['slot-scope'],
+        //         true
+        //     )
+        // }
         el.slotScope = slotScope
     }
 
     // slot="xxx"
+    // 获取slot属性的值 并添加到ast语法树上
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
         el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
@@ -735,21 +739,21 @@ function processSlotContent(el) {
             // v-slot on <template>
             const slotBinding = getAndRemoveAttrByRegex(el, slotRE)
             if (slotBinding) {
-                if (process.env.NODE_ENV !== 'production') {
-                    if (el.slotTarget || el.slotScope) {
-                        warn(
-                            `Unexpected mixed usage of different slot syntaxes.`,
-                            el
-                        )
-                    }
-                    if (el.parent && !maybeComponent(el.parent)) {
-                        warn(
-                            `<template v-slot> can only appear at the root level inside ` +
-                            `the receiving component`,
-                            el
-                        )
-                    }
-                }
+                // if (process.env.NODE_ENV !== 'production') {
+                //     if (el.slotTarget || el.slotScope) {
+                //         warn(
+                //             `Unexpected mixed usage of different slot syntaxes.`,
+                //             el
+                //         )
+                //     }
+                //     if (el.parent && !maybeComponent(el.parent)) {
+                //         warn(
+                //             `<template v-slot> can only appear at the root level inside ` +
+                //             `the receiving component`,
+                //             el
+                //         )
+                //     }
+                // }
                 const {
                     name,
                     dynamic
@@ -762,27 +766,27 @@ function processSlotContent(el) {
             // v-slot on component, denotes default slot
             const slotBinding = getAndRemoveAttrByRegex(el, slotRE)
             if (slotBinding) {
-                if (process.env.NODE_ENV !== 'production') {
-                    if (!maybeComponent(el)) {
-                        warn(
-                            `v-slot can only be used on components or <template>.`,
-                            slotBinding
-                        )
-                    }
-                    if (el.slotScope || el.slotTarget) {
-                        warn(
-                            `Unexpected mixed usage of different slot syntaxes.`,
-                            el
-                        )
-                    }
-                    if (el.scopedSlots) {
-                        warn(
-                            `To avoid scope ambiguity, the default slot should also use ` +
-                            `<template> syntax when there are other named slots.`,
-                            slotBinding
-                        )
-                    }
-                }
+                // if (process.env.NODE_ENV !== 'production') {
+                //     if (!maybeComponent(el)) {
+                //         warn(
+                //             `v-slot can only be used on components or <template>.`,
+                //             slotBinding
+                //         )
+                //     }
+                //     if (el.slotScope || el.slotTarget) {
+                //         warn(
+                //             `Unexpected mixed usage of different slot syntaxes.`,
+                //             el
+                //         )
+                //     }
+                //     if (el.scopedSlots) {
+                //         warn(
+                //             `To avoid scope ambiguity, the default slot should also use ` +
+                //             `<template> syntax when there are other named slots.`,
+                //             slotBinding
+                //         )
+                //     }
+                // }
                 // add the component's children to its default slot
                 const slots = el.scopedSlots || (el.scopedSlots = {})
                 const {
@@ -836,25 +840,28 @@ function getSlotName(binding) {
 }
 
 // handle <slot/> outlets
+// 处理插槽标签 slot ast上添加slotName属性
 function processSlotOutlet(el) {
     if (el.tag === 'slot') {
         el.slotName = getBindingAttr(el, 'name')
-        if (process.env.NODE_ENV !== 'production' && el.key) {
-            warn(
-                `\`key\` does not work on <slot> because slots are abstract outlets ` +
-                `and can possibly expand into multiple elements. ` +
-                `Use the key on a wrapping element instead.`,
-                getRawBindingAttr(el, 'key')
-            )
-        }
+        // if (process.env.NODE_ENV !== 'production' && el.key) {
+        //     warn(
+        //         `\`key\` does not work on <slot> because slots are abstract outlets ` +
+        //         `and can possibly expand into multiple elements. ` +
+        //         `Use the key on a wrapping element instead.`,
+        //         getRawBindingAttr(el, 'key')
+        //     )
+        // }
     }
 }
 
 function processComponent(el) {
     let binding
+
     if ((binding = getBindingAttr(el, 'is'))) {
         el.component = binding
     }
+
     if (getAndRemoveAttr(el, 'inline-template') != null) {
         el.inlineTemplate = true
     }

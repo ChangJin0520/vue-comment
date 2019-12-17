@@ -266,5 +266,46 @@ parse -> genDirectives -> gen(model) -> genCheckboxModel/... -> addProp -> addHa
         }
         ```
         自定义组件的model event属性用来设置事件类型 默认为input prop属性用来设置v-model的值以何标识符传入自定义组件中
+
+### slot
+#### slot
+1. 父组件
+    ```html
+    <div slot="xxx">xxx</div>
+    ```
+   1. html -> ast  
+        会把slot="xxx"解析为el.slotTarget;  
+        并且会把slot添加到el.attrs上;
+   2. ast -> render  
+        处理为"{attrs:{"slot":"header"},slot:"header"}"
+   3. render -> VNode  
+        node.data = {
+            attrs: {
+                slot: "header"
+            },
+            slot: "header"
+        }
+2. 自定义组件
+    1. 自定义组件init  
+        初始化自定义组件的过程, 会把自定义组件内的子元素带过来, 分组处理为vm.$slot
+        ```js
+        vm.$slots = {
+            default: [VNode, VNode....], // 为命名的内容用会当道default上
+            xxx: [VNode]
+            ....
+        }
+        ``` 
+    2. html -> ast (处理slot元素) 
+        ```html
+        <slot name="xxx"></slot>
+        ```
+        el.slotName = "xxx"
+    3. ast -> render
+        "_t("xxx")"
+    4. _t
+
+#### slot-scope
+
+
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)

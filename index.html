@@ -11,27 +11,34 @@
 
 <body>
     <div id="app">
-        <my-component v-model="value"></my-component>
-        <p>{{value}}</p>
+        <app-layout>
+            <p>主要内容的一个段落。</p>
+            <h1 slot="header">这里可能是一个页面标题</h1>
+            <div>另一个主要段落。</div>
+            <p slot="footer">这里有一些联系信息</p>
+        </app-layout>
+        <span>end</span>
     </div>
-    <script>
+    <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
-            data: {
-                value: "哈哈"
-            },
             components: {
-                myComponent: {
-                    template: '<p @click="change">子组件{{value}}</p>',
-                    props: ['value'],
-                    methods: {
-                        change: function() {
-                            this.$emit('input', "呵呵");
-                        }
-                    }
+                AppLayout: {
+                    template: '<div class="container">\
+                        <header>\
+                            <slot name="header"></slot>\
+                        </header>\
+                        <main>\
+                            <slot></slot>\
+                            <slot name="notExist"><p>这是降级使用的段落</p></slot>\
+                        </main>\
+                        <footer>\
+                            <slot name="footer"></slot>\
+                        </footer>\
+                    </div>'
                 }
             }
-        }).$mount('#app');
+        })
 
     </script>
 </body>
