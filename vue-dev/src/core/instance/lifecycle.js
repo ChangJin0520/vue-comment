@@ -52,6 +52,8 @@ export function initLifecycle(vm: Component) {
         while (parent.$options.abstract && parent.$parent) {
             parent = parent.$parent
         }
+
+        // 把组件添加到第一个非抽象组件下
         parent.$children.push(vm)
     }
 

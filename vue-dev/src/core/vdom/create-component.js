@@ -42,15 +42,15 @@ import {
 // patch执行期间在组件VNode上调用内联挂钩
 const componentVNodeHooks = {
     init(vnode: VNodeWithData, hydrating: boolean): ? boolean {
-        // 如果componentInstance存在 且 未被销毁 且 需要keepAlive
-        // 则直接调用prepatch
+        // 如果componentInstance存在 且 未被销毁 且 需要keepAlive; 则直接调用prepatch
         if (
             vnode.componentInstance &&
             !vnode.componentInstance._isDestroyed &&
             vnode.data.keepAlive
         ) {
             // kept-alive components, treat as a patch
-            const mountedNode: any = vnode // work around flow
+            // 保持活动的组件，视为patch
+            const mountedNode = vnode
             componentVNodeHooks.prepatch(mountedNode, mountedNode)
         } else {
             // vnode.componentInstance不存在 或 已经销毁 或 非keepAlive
@@ -72,6 +72,7 @@ const componentVNodeHooks = {
         const options = vnode.componentOptions
         const child = vnode.componentInstance = oldVnode.componentInstance
 
+        // 更新子组件
         updateChildComponent(
             child,
             options.propsData, // updated props
@@ -93,6 +94,7 @@ const componentVNodeHooks = {
             callHook(componentInstance, 'mounted')
         }
 
+        // 组件插入页面后如果是keep-alive的组件
         if (vnode.data.keepAlive) {
             if (context._isMounted) {
                 // vue-router#1212
@@ -117,7 +119,7 @@ const componentVNodeHooks = {
 
         // 如果未销毁则进行销毁
         if (!componentInstance._isDestroyed) {
-            // 如果组件未keepAlive 则调用$destory进行销毁
+            // 如果组件不是keep-alive 则调用$destory进行销毁
             // 否则对子组件进行deactivate处理
             if (!vnode.data.keepAlive) {
                 componentInstance.$destroy()

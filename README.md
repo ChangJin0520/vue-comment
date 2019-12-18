@@ -374,5 +374,12 @@ parse -> genDirectives -> gen(model) -> genCheckboxModel/... -> addProp -> addHa
     4. render -> VNode  
         主要是_t的处理.  
         根据_t的name, 执行对应的fn, 传入参数,返回对应的VNode
+
+### keep-alive
+1. keep-alive本身是一个抽象组件, 不渲染为DOM, 组件内会对内部的组件cache
+2. keep-alive组件的render返回其内的第一个自定义组件的vnode
+3. 经过keep-alive的组件, 其vnode上会添加vnode.data.keepAlive = true
+
+
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)
