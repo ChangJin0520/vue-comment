@@ -93,6 +93,7 @@ export function renderMixin(Vue: Class<Component> ) {
             _parentVnode
         } = vm.$options
 
+        // 处理scopleSlot并放到vm上
         if (_parentVnode) {
             vm.$scopedSlots = normalizeScopedSlots(
                 _parentVnode.data.scopedSlots,

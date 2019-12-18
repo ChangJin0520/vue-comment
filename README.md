@@ -277,7 +277,7 @@ parse -> genDirectives -> gen(model) -> genCheckboxModel/... -> addProp -> addHa
         会把slot="xxx"解析为el.slotTarget;  
         并且会把slot添加到el.attrs上;
    2. ast -> render  
-        处理为"{attrs:{"slot":"header"},slot:"header"}"
+        处理为"_c('div', {attrs:{"slot":"header"},slot:"header"})"
    3. render -> VNode  
         node.data = {
             attrs: {
@@ -294,18 +294,85 @@ parse -> genDirectives -> gen(model) -> genCheckboxModel/... -> addProp -> addHa
             xxx: [VNode]
             ....
         }
-        ``` 
-    2. html -> ast (处理slot元素) 
+        ```
         ```html
         <slot name="xxx"></slot>
         ```
+    2. html -> ast (处理slot元素) 
         el.slotName = "xxx"
     3. ast -> render
         "_t("xxx")"
-    4. _t
+    4. _t  
+        根据slot上的name xxx, 获取自定义组件内对应子元素的VNode
 
-#### slot-scope
-
-
+#### 作用域插槽 slot-scope
+1. 父组件
+   ```html
+    <app-out>
+        <template slot="item" slot-scope="aaa">
+            <li>{{ aaa.text }}{{ aaa.name }}</li>
+        </template>
+    </app-out>
+   ```
+   1. html -> ast  
+        ```js
+        el = {
+            tag: "tempalte",
+            slotTarget: ""item"",
+            slotScope: "aaa"
+        }
+        ```
+    2. 对template元素的特殊处理  
+        会把当前template的ast添加到其父节点的scopedSlots属性上
+        ```js
+        el:parent = {
+            scopedSlots: {
+                ""item"": el:template
+            }
+        }
+        ```
+        然后会把整个template的ast从ast树中过滤掉
+    3. el:parent ast -> render  
+        ```js
+        // render字符串对应的函数
+        // 这里因为aaa是来自子组件的 所以以函数的方式放到scopeSlots中, 到自定义组件初始化的时候再执行
+        _c('app-out', {
+                // scopeSlots数组是自定义组件中包含的作用域插槽
+                scopedSlots:_u([{ // _u把数组处理为键值对形式
+                    key: "item",
+                    // fn的返回值是对应作用域插槽中的children对应的VNode
+                    fn: function(aaa){
+                        return [_c('li',[_v(_s(aaa.text)+_s(aaa.name))])]
+                    }
+                }])
+            }
+        )
+        ```
+2. 子组件  
+    ```html
+    <ul>
+        <slot name="item"
+            v-for="item in items"
+            :text="item.text" v-bind="{name: '123'}">
+        </slot>
+    </ul>
+    ```
+    1. 子组件render之前, 会从parentVnode中取到scopeSlots处理后赋值给vm.$scopeSlots
+    2. html -> ast
+        和slot中对slot标签的处理方式一样
+    3. ast -> render
+        ```js
+        // render字符串对应的函数
+        _c('ul', [_l(items, function(item) {
+            return _t('item', null, {
+                'text': item.text
+            }, {
+                name: '123'
+            });
+        })]);
+        ```
+    4. render -> VNode  
+        主要是_t的处理.  
+        根据_t的name, 执行对应的fn, 传入参数,返回对应的VNode
 ## 参考
 [vue2.0-source](https://github.com/liutao/vue2.0-source)

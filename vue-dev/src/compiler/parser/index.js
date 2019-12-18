@@ -164,10 +164,13 @@ export function parse(
             if (element.elseif || element.else) {
                 processIfConditions(element, currentParent)
             } else {
+                // 处理slot-scope的情况 把当前ast节点按name放到父级的scopedSlots上
                 if (element.slotScope) {
                     // scoped slot
                     // keep it in the children list so that v-else(-if) conditions can
                     // find it as the prev node.
+                    // 作用域插槽
+                    // 将其保留在子级列表中，以便v-else（-if）条件可以将其找到为上一个节点。
                     const name = element.slotTarget || '"default"';
                     (currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
                 }
@@ -180,14 +183,20 @@ export function parse(
 
         // final children cleanup
         // filter out scoped slots
-        element.children = element.children.filter(c => !(c: any).slotScope)
+        // ast子节点处理 过滤掉scope-slot
+        element.children = element.children.filter(c => !c.slotScope)
+
         // remove trailing whitespace node again
+        // 再次删除尾随空白节点
         trimEndingWhitespace(element)
 
         // check pre state
+        // 校验pre状态
         if (element.pre) {
             inVPre = false
         }
+
+        // pre标记置false
         if (platformIsPreTag(element.tag)) {
             inPre = false
         }
@@ -691,7 +700,7 @@ function processOnce(el) {
 function processSlotContent(el) {
     let slotScope
     if (el.tag === 'template') {
-        slotScope = getAndRemoveAttr(el, 'scope')
+        slotScope = getAndRemoveAttr(el, 'scope') // 处理template上的scope属性
 
         /* istanbul ignore if */
         // if (process.env.NODE_ENV !== 'production' && slotScope) {
@@ -705,7 +714,7 @@ function processSlotContent(el) {
         //     )
         // }
 
-        el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
+        el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope') // 处理template上的slot-scope属性
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
         /* istanbul ignore if */
         // if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {

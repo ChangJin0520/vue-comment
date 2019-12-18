@@ -327,7 +327,9 @@ export function genData(el: ASTElement, state: CodegenState): string {
     if (el.slotTarget && !el.slotScope) {
         data += `slot:${el.slotTarget},`
     }
+
     // scoped slots
+    // 处理scope-slot属性 返回一个到data上
     if (el.scopedSlots) {
         data += `${genScopedSlots(el, el.scopedSlots, state)},`
     }
@@ -445,13 +447,18 @@ function genScopedSlots(
     // components with only scoped slots to skip forced updates from parent.
     // but in some cases we have to bail-out of this optimization
     // for example if the slot contains dynamic names, has v-if or v-for on them...
+    // 默认情况下，作用域插槽被认为是“稳定的”，
+    // 这允许仅具有作用域插槽的子组件跳过来自父代的强制更新。
+    // 但在某些情况下，例如，如果slot包含动态名称，在其上带有v-if或v-for，则我们必须放弃这种优化措施...
+    // 当前元素如果存在v-for循环/
     let needsForceUpdate = el.for || Object.keys(slots).some(key => {
         const slot = slots[key]
+
         return (
             slot.slotTargetDynamic ||
             slot.if ||
             slot.for ||
-            containsSlotChild(slot) // is passing down slot from parent which may be dynamic
+            containsSlotChild(slot) // is passing down slot from parent which may be dynamic 正在从父级传递slot，这可能是动态的
         )
     })
 
@@ -459,6 +466,9 @@ function genScopedSlots(
     // it's possible for the same component to be reused but with different
     // compiled slot content. To avoid that, we generate a unique key based on
     // the generated code of all the slot contents.
+    // ＃9534：如果具有作用域插槽的组件位于条件分支中，
+    // 有可能重复使用相同的组件，但编译后的插槽内容不同。
+    // 为了避免这种情况，我们根据所有slot内容的生成代码生成唯一密钥。
     let needsKey = !!el.if
 
     // OR when it is inside another scoped slot or v-for (the reactivity may be
@@ -466,6 +476,9 @@ function genScopedSlots(
     // #9438, #9506
     // TODO: this can be further optimized by properly analyzing in-scope bindings
     // and skip force updating ones that do not actually use scope variables.
+    // 或者当它在另一个作用域插槽或v-for中时（由于中间作用域变量，反应性可能会断开）
+    // ＃9438，＃9506
+    // TODO：可以通过适当地分析范围内的绑定并跳过不实际使用范围变量的强制更新来进一步优化此绑定。
     if (!needsForceUpdate) {
         let parent = el.parent
         while (parent) {
@@ -487,11 +500,7 @@ function genScopedSlots(
         .map(key => genScopedSlot(slots[key], state))
         .join(',')
 
-    return `scopedSlots:_u([${generatedSlots}]${
-    needsForceUpdate ? `,null,true` : ``
-  }${
-    !needsForceUpdate && needsKey ? `,null,false,${hash(generatedSlots)}` : ``
-  })`
+    return `scopedSlots:_u([${generatedSlots}]${needsForceUpdate ? `,null,true` : ``}${!needsForceUpdate && needsKey ? `,null,false,${hash(generatedSlots)}` : ``})`
 }
 
 function hash(str) {
@@ -518,24 +527,31 @@ function genScopedSlot(
     state: CodegenState
 ): string {
     const isLegacySyntax = el.attrsMap['slot-scope']
+
+    // 如果存在if 则if优先处理
     if (el.if && !el.ifProcessed && !isLegacySyntax) {
         return genIf(el, state, genScopedSlot, `null`)
     }
+
+    // 存在for 则for优先处理
     if (el.for && !el.forProcessed) {
         return genFor(el, state, genScopedSlot)
     }
-    const slotScope = el.slotScope === emptySlotScopeToken ?
-        `` :
-        String(el.slotScope)
+
+    const slotScope = el.slotScope === emptySlotScopeToken ? `` : String(el.slotScope)
+
+    // 这里会处理template中的子元素
     const fn = `function(${slotScope}){` +
-        `return ${el.tag === 'template'
-      ? el.if && isLegacySyntax
-        ? `(${el.if})?${genChildren(el, state) || 'undefined'}:undefined`
-        : genChildren(el, state) || 'undefined'
-      : genElement(el, state)
+        `return ${el.tag === 'template' ?
+            el.if && isLegacySyntax ?
+                `(${el.if})?${genChildren(el, state) || 'undefined'}:undefined` :
+                genChildren(el, state) || 'undefined' :
+            genElement(el, state)
     }}`
+
     // reverse proxy v-slot without scope on this.$slots
     const reverseProxy = slotScope ? `` : `,proxy:true`
+
     return `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
 }
 

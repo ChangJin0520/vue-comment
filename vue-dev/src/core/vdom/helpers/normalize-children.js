@@ -36,16 +36,22 @@ export function simpleNormalizeChildren(children: any) {
 // e.g. <template>, <slot>, v-for, or when the children is provided by user
 // with hand-written render functions / JSX. In such cases a full normalization
 // is needed to cater to all possible types of children values.
-export function normalizeChildren(children: any): ? Array< VNode> {
-    return isPrimitive(children) ? [createTextVNode(children)] : Array.isArray(children) ?
-        normalizeArrayChildren(children) : undefined
+// 2.当子级包含始终生成嵌套数组的构造时，
+// 例如 <template>，<slot>，v-for或用户为子代提供手写的渲染功能/ JSX时。
+// 在这种情况下，需要完全规范化以适应所有可能类型的子代值。
+export function normalizeChildren(children: any): ? Array<VNode> {
+    return isPrimitive(children) ?
+        [createTextVNode(children)] :
+        Array.isArray(children) ?
+            normalizeArrayChildren(children) :
+            undefined
 }
 
 function isTextNode(node): boolean {
     return isDef(node) && isDef(node.text) && isFalse(node.isComment)
 }
 
-function normalizeArrayChildren(children: any, nestedIndex ?: string): Array< VNode> {
+function normalizeArrayChildren(children: any, nestedIndex ?: string): Array<VNode> {
     const res = []
     let i, c, lastIndex, last
     for (i = 0; i < children.length; i++) {
