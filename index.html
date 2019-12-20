@@ -11,36 +11,13 @@
 
 <body>
     <div id="app">
-        <app-layout :items="items">
-            <template slot="item" slot-scope="aaa">
-                <li>{{ aaa.text }}{{ aaa.name }}</li>
-            </template>
-        </app-layout>
+        {{msg}}
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
-            components: {
-                AppLayout: {
-                    template: '<ul>\
-                            <slot name="item"\
-                                v-for="item in items"\
-                                :text="item.text" v-bind="{name: \'liutao\'}">\
-                            </slot>\
-                        </ul>',
-                    props: {
-                        items: Array
-                    }
-                }
-            },
             data: {
-                items: [{
-                    text: 'text1'
-                }, {
-                    text: 'text2'
-                }, {
-                    text: 'text3'
-                }]
+                msg: '123'
             }
         })
 
