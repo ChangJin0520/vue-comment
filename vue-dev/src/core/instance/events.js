@@ -51,11 +51,11 @@ export function updateComponentListeners(
     target = undefined
 }
 
-export function eventsMixin(Vue: Class< Component> ) {
+export function eventsMixin(Vue: Class<Component> ) {
     const hookRE = /^hook:/
 
     // 事件注册
-    Vue.prototype.$on = function(event: string | Array< string> , fn: Function): Component {
+    Vue.prototype.$on = function(event: string | Array<string> , fn: Function): Component {
         const vm: Component = this
 
         if (Array.isArray(event)) { // 如果event是数组 则把该方法添加到不同事件
@@ -91,7 +91,7 @@ export function eventsMixin(Vue: Class< Component> ) {
     }
 
     // 事件销毁
-    Vue.prototype.$off = function(event ?: string | Array< string> , fn ?: Function): Component {
+    Vue.prototype.$off = function(event ?: string | Array<string> , fn ?: Function): Component {
         const vm: Component = this
 
         // all 不传递参数 则清空_events

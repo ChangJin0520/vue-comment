@@ -29,8 +29,8 @@ const idToTemplate = cached(id => {
 
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function(
-    el ? : string | Element,
-    hydrating ? : boolean
+    el ?: string | Element,
+    hydrating ?: boolean
 ): Component {
     el = el && query(el)
 

@@ -153,9 +153,9 @@ strats.data = function(
  * Hooks and props are merged as arrays.
  */
 function mergeHook(
-    parentVal: ? Array< Function> ,
-    childVal: ? Function | ? Array< Function>
-): ? Array< Function> {
+    parentVal: ? Array<Function> ,
+    childVal: ? Function | ? Array<Function>
+): ? Array<Function> {
     const res = childVal ?
         parentVal ?
         parentVal.concat(childVal) :
@@ -401,6 +401,7 @@ function assertObjectType(name: string, value: any, vm: ? Component) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
+ * 将两个选项对象合并到一个新的对象中。用于实例化和继承的核心方法。
  */
 export function mergeOptions(
     parent: Object,

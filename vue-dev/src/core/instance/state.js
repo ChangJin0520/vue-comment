@@ -325,10 +325,11 @@ function createWatcher(
     return vm.$watch(expOrFn, handler, options)
 }
 
-export function stateMixin(Vue: Class< Component> ) {
+export function stateMixin(Vue: Class<Component> ) {
     // flow somehow has problems with directly declared definition object
     // when using Object.defineProperty, so we have to procedurally build up
     // the object here.
+    // 兼容flow语法
     const dataDef = {}
     dataDef.get = function() {
         return this._data
@@ -337,8 +338,10 @@ export function stateMixin(Vue: Class< Component> ) {
     propsDef.get = function() {
         return this._props
     }
+
     if (process.env.NODE_ENV !== 'production') {
         dataDef.set = function() {
+            // 避免替换实例根$data.而改用嵌套数据属性。
             warn(
                 'Avoid replacing instance root $data. ' +
                 'Use nested data properties instead.',
@@ -346,9 +349,11 @@ export function stateMixin(Vue: Class< Component> ) {
             )
         }
         propsDef.set = function() {
+            // $props是只读的
             warn(`$props is readonly.`, this)
         }
     }
+
     Object.defineProperty(Vue.prototype, '$data', dataDef)
     Object.defineProperty(Vue.prototype, '$props', propsDef)
 

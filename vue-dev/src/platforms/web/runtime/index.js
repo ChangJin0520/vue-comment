@@ -29,30 +29,30 @@ import {
 import platformDirectives from './directives/index'
 import platformComponents from './components/index'
 
-// install platform specific utils
+// install platform specific utils 安装特定平台工具到Vue.config
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
 Vue.config.isReservedAttr = isReservedAttr
 Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
-// install platform runtime directives & components
-extend(Vue.options.directives, platformDirectives)
-extend(Vue.options.components, platformComponents)
+// install platform runtime directives & components 安装平台运行时指令和组件
+extend(Vue.options.directives, platformDirectives) // v-model v-show
+extend(Vue.options.components, platformComponents) // transition transition-group
 
-// install platform patch function
+// install platform patch function 定义平台patch函数
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
-// public mount method
+// public mount method 公共mount方法
 Vue.prototype.$mount = function(
-    el ? : string | Element,
-    hydrating ? : boolean
+    el ?: string | Element,
+    hydrating ?: boolean
 ): Component {
     el = el && inBrowser ? query(el) : undefined
     return mountComponent(this, el, hydrating)
 }
 
-// devtools global hook
+// devtools global hook 开发工具全局钩子
 /* istanbul ignore next */
 if (inBrowser) {
     setTimeout(() => {
