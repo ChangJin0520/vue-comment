@@ -47,6 +47,7 @@ export function initLifecycle(vm: Component) {
     const options = vm.$options
 
     // locate first non-abstract parent
+    // 找到第一非抽象父组件
     let parent = options.parent
     if (parent && !options.abstract) {
         while (parent.$options.abstract && parent.$parent) {
@@ -237,6 +238,9 @@ export function mountComponent(
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
+    // 我们将其设置为观察者构造函数中的vm._watcher
+    // 因为观察者的初始patch可能会调用$forceUpdate（例如，在子组件的已挂载钩子内部）
+    // 这取决于已经定义的vm._watcher
     new Watcher(vm, updateComponent, noop, {
         before() {
             if (vm._isMounted && !vm._isDestroyed) {

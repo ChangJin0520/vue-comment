@@ -28,6 +28,7 @@ export function initAssetRegisters(Vue: GlobalAPI) {
                     validateComponentName(id)
                 }
 
+                // 处理组件
                 if (type === 'component' && isPlainObject(definition)) {
                     definition.name = definition.name || id
                     definition = this.options._base.extend(definition) // this.options._base就是Vue

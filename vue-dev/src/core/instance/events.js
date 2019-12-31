@@ -14,7 +14,7 @@ import {
 export function initEvents(vm: Component) {
     vm._events = Object.create(null) // 当前元素上绑定的自定义事件
     vm._hasHookEvent = false // 标识是否有hook:开头的事件
-    // init parent attached events
+    // init parent attached events 初始化父组件上的附加事件
     const listeners = vm.$options._parentListeners
     if (listeners) {
         updateComponentListeners(vm, listeners)

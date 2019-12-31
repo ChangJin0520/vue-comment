@@ -37,27 +37,25 @@ export function initMixin(Vue: Class<Component> ) {
     Vue.prototype._init = function(options ?: Object) {
         const vm: Component = this
         // a uid
-        // 自增的id
+        // 自增的id Vue实例的唯一性标识
         vm._uid = uid++
 
         // 性能相关代码
-        let startTag, endTag
-        /* istanbul ignore if */
-        if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
-            startTag = `vue-perf-start:${vm._uid}`
-            endTag = `vue-perf-end:${vm._uid}`
-            mark(startTag)
-        }
+        // let startTag, endTag
+        // /* istanbul ignore if */
+        // if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+        //     startTag = `vue-perf-start:${vm._uid}`
+        //     endTag = `vue-perf-end:${vm._uid}`
+        //     mark(startTag)
+        // }
 
         // a flag to avoid this being observed
-        // 标示是vue对象，避免被observe
+        // 标识Vue对象，避免被observe
         vm._isVue = true
 
         // merge options
         // 合并配置
-
-        // 当初始化组件的时候_isComponent为true
-        if (options && options._isComponent) {
+        if (options && options._isComponent) { // 当初始化组件的时候_isComponent为true
             // optimize internal component instantiation
             // since dynamic options merging is pretty slow, and none of the
             // internal component options needs special treatment.
@@ -65,6 +63,7 @@ export function initMixin(Vue: Class<Component> ) {
             // 因为动态选项合并非常慢 并且没有内部组件选项需要特殊处理。
             initInternalComponent(vm, options)
         } else {
+            // 合并传入的options和Vue上的options
             vm.$options = mergeOptions(
                 resolveConstructorOptions(vm.constructor),
                 options || {},
@@ -125,8 +124,13 @@ export function initInternalComponent(vm: Component, options: InternalComponentO
     }
 }
 
+// 解析构造函数选项
 export function resolveConstructorOptions(Ctor: Class<Component> ) {
+    // Ctor = vm.constructor = Vue
+    // 如果是子组件 Ctor指向Vue的子类
     let options = Ctor.options
+
+    // Ctor.super用来判断是否为子组件
     if (Ctor.super) {
         const superOptions = resolveConstructorOptions(Ctor.super)
         const cachedSuperOptions = Ctor.superOptions
@@ -146,6 +150,7 @@ export function resolveConstructorOptions(Ctor: Class<Component> ) {
             }
         }
     }
+
     return options
 }
 

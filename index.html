@@ -11,16 +11,20 @@
 
 <body>
     <div id="app">
-        {{msg}}
+        <p>{{message}}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
             data: {
-                msg: '123'
+                message: '第一个vue实例'
+            },
+            methods: {
+                log() {
+                    console.log(123)
+                }
             }
         })
-
     </script>
 </body>
 

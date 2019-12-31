@@ -158,11 +158,13 @@ function mergeHook(
 ): ? Array<Function> {
     const res = childVal ?
         parentVal ?
-        parentVal.concat(childVal) :
-        Array.isArray(childVal) ?
-        childVal : [childVal] : parentVal
-    return res ?
-        dedupeHooks(res) : res
+            parentVal.concat(childVal) :
+            Array.isArray(childVal) ?
+                childVal :
+                [childVal] :
+        parentVal
+
+    return res ? dedupeHooks(res) : res
 }
 
 function dedupeHooks(hooks) {
@@ -266,6 +268,7 @@ strats.provide = mergeDataOrFn
 
 /**
  * Default strategy.
+ * 默认合并策略 就是有child就用child 没有child就用parent
  */
 const defaultStrat = function(parentVal: any, childVal: any): any {
     return childVal === undefined ?
@@ -408,6 +411,7 @@ export function mergeOptions(
     child: Object,
     vm ?: Component
 ): Object {
+    // 校验组件
     if (process.env.NODE_ENV !== 'production') {
         checkComponents(child)
     }
@@ -416,18 +420,24 @@ export function mergeOptions(
         child = child.options
     }
 
-    normalizeProps(child, vm)
-    normalizeInject(child, vm)
-    normalizeDirectives(child)
+    // props inject directive的归一化
+    normalizeProps(child, vm) // prop有数组, 对象形式, 统一起来
+    normalizeInject(child, vm) // inject有数组, 对象形式, 统一起来
+    normalizeDirectives(child) // 处理配置中的指令项
 
     // Apply extends and mixins on the child options,
     // but only if it is a raw options object that isn't
     // the result of another mergeOptions call.
     // Only merged options has the _base property.
-    if (!child._base) {
+    // 在子选项上应用扩展和混合，
+    // 但仅当它是原始选项对象而不是另一个mergeOptions调用的结果时。
+    if (!child._base) { // 仅已合并的选项具有_base属性。
+        // 合并配置上的extends
         if (child.extends) {
             parent = mergeOptions(parent, child.extends, vm)
         }
+
+        // 合并配置上的mixins
         if (child.mixins) {
             for (let i = 0, l = child.mixins.length; i < l; i++) {
                 parent = mergeOptions(parent, child.mixins[i], vm)
@@ -446,10 +456,12 @@ export function mergeOptions(
         }
     }
 
+    // 根据不同属性对应的不同策略 合并出options
     function mergeField(key) {
         const strat = strats[key] || defaultStrat
         options[key] = strat(parent[key], child[key], vm, key)
     }
+
     return options
 }
 

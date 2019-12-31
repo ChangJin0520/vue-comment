@@ -74,7 +74,7 @@ export default class Watcher {
             this.deep = this.user = this.lazy = this.sync = false
         }
         this.cb = cb
-        this.id = ++uid // uid for batching
+        this.id = ++uid // uid for batching 批处理的uid
         this.active = true
         this.dirty = this.lazy // for lazy watchers
         this.deps = []
