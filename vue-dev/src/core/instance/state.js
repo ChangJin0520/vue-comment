@@ -135,6 +135,7 @@ function initData(vm: Component) {
     let i = keys.length
     while (i--) {
         const key = keys[i]
+        // data与methods重名提示
         if (process.env.NODE_ENV !== 'production') {
             if (methods && hasOwn(methods, key)) {
                 warn(
@@ -143,6 +144,7 @@ function initData(vm: Component) {
                 )
             }
         }
+        // data与props重名提示
         if (props && hasOwn(props, key)) {
             process.env.NODE_ENV !== 'production' && warn(
                 `The data property "${key}" is already declared as a prop. ` +

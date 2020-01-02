@@ -35,6 +35,8 @@ export function toggleObserving(value: boolean) {
  * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
+ * 附加到每个观察对象的Observer类。
+ * 附加后，观察者将目标对象的属性键转换为收集依赖项并调度更新的getter / setter。
  */
 export class Observer {
     value: any;
@@ -45,15 +47,17 @@ export class Observer {
         this.value = value
         this.dep = new Dep()
         this.vmCount = 0
-        def(value, '__ob__', this)
-        if (Array.isArray(value)) {
+        def(value, '__ob__', this) // 把Observer实例添加到被观察对象的__ob__上
+
+        if (Array.isArray(value)) { // 对数组的处理
             if (hasProto) {
                 protoAugment(value, arrayMethods)
             } else {
                 copyAugment(value, arrayMethods, arrayKeys)
             }
+
             this.observeArray(value)
-        } else {
+        } else { // 对象处理
             this.walk(value)
         }
     }
@@ -62,6 +66,8 @@ export class Observer {
      * Walk through all properties and convert them into
      * getter/setters. This method should only be called when
      * value type is Object.
+     * 遍历所有属性并将它们转换为getter / setter。
+     * 仅当值类型为Object时才应调用此方法。
      */
     walk(obj: Object) {
         const keys = Object.keys(obj)
@@ -108,13 +114,18 @@ function copyAugment(target: Object, src: Object, keys: Array<string> ) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
+ * 尝试为值创建观察者实例，
+ * 如果成功观察到，则返回新观察者，
+ * 或现有的观察者（如果值已包含一个）。
  */
-export function observe(value: any, asRootData: ? boolean): Observer | void {
+export function observe(value, asRootData) {
+    // 不是对象或是VNode对象 则直接return
     if (!isObject(value) || value instanceof VNode) {
         return
     }
-    let ob: Observer | void
-    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+
+    let ob
+    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { // 如果存在__ob__属性且该属性值是一个Observer对象 则复用
         ob = value.__ob__
     } else if (
         shouldObserve &&
@@ -125,14 +136,18 @@ export function observe(value: any, asRootData: ? boolean): Observer | void {
     ) {
         ob = new Observer(value)
     }
+
+    // 如果把该Observe对象作为根数据则vmCount+1
     if (asRootData && ob) {
         ob.vmCount++
     }
+
     return ob
 }
 
 /**
  * Define a reactive property on an Object.
+ * 在对象上定义一个响应式属性
  */
 export function defineReactive(
     obj: Object,
@@ -141,6 +156,7 @@ export function defineReactive(
     customSetter ?: ? Function,
     shallow ?: boolean
 ) {
+    // 每个响应式属性的值都在闭包中保存一个Dep对象
     const dep = new Dep()
 
     const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -149,13 +165,15 @@ export function defineReactive(
     }
 
     // cater for pre-defined getter/setters
+    // 获取getter setter val childOb
     const getter = property && property.get
     const setter = property && property.set
     if ((!getter || setter) && arguments.length === 2) {
         val = obj[key]
     }
-
     let childOb = !shallow && observe(val)
+
+    // 数据劫持
     Object.defineProperty(obj, key, {
         enumerable: true,
         configurable: true,
@@ -175,22 +193,27 @@ export function defineReactive(
         set: function reactiveSetter(newVal) {
             const value = getter ? getter.call(obj) : val
             /* eslint-disable no-self-compare */
+            // 值相等或为NaN的时候直接返回
             if (newVal === value || (newVal !== newVal && value !== value)) {
                 return
             }
+
             /* eslint-enable no-self-compare */
             if (process.env.NODE_ENV !== 'production' && customSetter) {
                 customSetter()
             }
+
             // #7981: for accessor properties without setter
+            // 赋新值
             if (getter && !setter) return
             if (setter) {
                 setter.call(obj, newVal)
             } else {
                 val = newVal
             }
-            childOb = !shallow && observe(newVal)
-            dep.notify()
+
+            childOb = !shallow && observe(newVal) // observe新值
+            dep.notify() // 触发订阅
         }
     })
 }
