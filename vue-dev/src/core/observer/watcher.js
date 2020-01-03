@@ -33,30 +33,12 @@ let uid = 0
  * This is used for both the $watch() api and directives.
  */
 export default class Watcher {
-    vm: Component;
-    expression: string;
-    cb: Function;
-    id: number;
-    deep: boolean;
-    user: boolean;
-    lazy: boolean;
-    sync: boolean;
-    dirty: boolean;
-    active: boolean;
-    deps: Array<Dep> ;
-    newDeps: Array<Dep> ;
-    depIds: SimpleSet;
-    newDepIds: SimpleSet;
-    before: ? Function;
-    getter: Function;
-    value: any;
-
     constructor(
-        vm: Component,
-        expOrFn: string | Function,
-        cb: Function,
-        options ?: ? Object,
-        isRenderWatcher ?: boolean
+        vm,
+        expOrFn,
+        cb,
+        options,
+        isRenderWatcher
     ) {
         this.vm = vm
         if (isRenderWatcher) {
@@ -106,9 +88,11 @@ export default class Watcher {
 
     /**
      * Evaluate the getter, and re-collect dependencies.
+     * 执行getter并重新收集依赖项
      */
     get() {
         pushTarget(this)
+
         let value
         const vm = this.vm
         try {
@@ -174,10 +158,10 @@ export default class Watcher {
         /* istanbul ignore else */
         if (this.lazy) {
             this.dirty = true
-        } else if (this.sync) {
+        } else if (this.sync) { // 同步执行的话直接run
             this.run()
         } else {
-            queueWatcher(this)
+            queueWatcher(this) // 否则先排列当前Watcher
         }
     }
 

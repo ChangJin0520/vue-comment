@@ -17,8 +17,8 @@ import {
 
 export const MAX_UPDATE_COUNT = 100
 
-const queue: Array < Watcher > = []
-const activatedChildren: Array < Component > = []
+const queue: Array<Watcher> = []
+const activatedChildren: Array<Component> = []
 let has: {
     [key: number]: ? true
 } = {}
@@ -171,6 +171,8 @@ function callActivatedHooks(queue) {
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
+ * 将观察者推送到观察者队列中。
+ * 除非刷新队列时将其推送，否则将跳过具有重复ID的任务。
  */
 export function queueWatcher(watcher: Watcher) {
     const id = watcher.id
@@ -181,6 +183,8 @@ export function queueWatcher(watcher: Watcher) {
         } else {
             // if already flushing, splice the watcher based on its id
             // if already past its id, it will be run next immediately.
+            // 如果已经flushing，则根据其ID拼接观察者
+            // 如果已经超过其ID，它将在下一个执行。
             let i = queue.length - 1
             while (i > index && queue[i].id > watcher.id) {
                 i--
