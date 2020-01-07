@@ -1,0 +1,55 @@
+[{
+    "labelName": "检查",
+    "labelValue": "30",
+    "labelPayLoadTypes": {
+        "name": "检查",
+        "value": "XDS.EISBG,XDS.UR2.NMBG.REST,XDS.UR2.NUCLEARBG,XDS.UR2.VASCULARBG,XDS.UR2.HEARTBG,XDS.UR2.ABDOMENBG,XDS.GEECGBG,XDS.KT.RISBG,XDS.LJPISBG,XDS.XDBG,XDS.SJT.PISBG,XDS.NETHBG,XDS.ESBG,XDS.CSBG,XDS.CHUYUANJILU,XDS.ECGBG,XDS.GPY.HXNK.EISBG,XDS.CarInvBG,XDS.EBRBG,XDS.UR2.HXNK.EISBG,XDS.UR2.EISEBHKBG,XDS.UR2.EISBG,XDS.UR2.USBG,XDS.PISBG,XDS.LYUSBG,XDS.USBG,XDS.RISBG,XDS.UR2.RISBG",
+        "show": "no",
+        "type": "payLoadType.JianCha"
+    }
+}, {
+    "labelName": "病程记录",
+    "labelValue": "5",
+    "labelPayLoadTypes": {
+        "name": "病程记录",
+        "value": "XDS.ProgressNote.008,XDS.ProgressNoteFirst,XDS.FirstPostoperativeCourse,XDS.WardRecord,XDS.KT.EMR.ShuQianTaoLun,XDS.KT.EMR.BingChengJiLu,XDS.KT.EMR.ShouCiBingChengJiLu,XDS.ABW.TestAndInspect,XDS.ProgressNote,XDS.ProgressNote.3003,XDS.ProgressNote.3002,XDS.ProgressNote.3001,XDS.ProgressNote.2001,XDS.ProgressNote.1501,XDS.ProgressNote.13,XDS.ProgressNote.1023,XDS.ProgressNote.1021,XDS.ProgressNote.1020,XDS.ProgressNote.0027,XDS.ProgressNote.0020,XDS.ProgressNote.a041,XDS.ProgressNote.3005,XDS.ProgressNote.3004,XDS.ProgressNote.0009,XDS.ProgressNote.0021,XDS.ProgressNote.0017,XDS.ProgressNote.0012,XDS.ProgressNote.0024,XDS.ProgressNote.0002,XDS.ProgressNote.0003,XDS.ProgressNote.0004,XDS.ProgressNote.0001",
+        "show": "yes",
+        "type": "payLoadType.Progress"
+    }
+}, {
+    "labelName": "入院记录",
+    "labelValue": "2",
+    "labelPayLoadTypes": {
+        "name": "入院记录",
+        "value": "XDS.InchargeRecord",
+        "show": "yes",
+        "type": "payLoadType.Incharge"
+    }
+}, {
+    "labelName": "检验",
+    "labelValue": "36",
+    "labelPayLoadTypes": {
+        "name": "检验",
+        "value": "XDS.LISBG,XDS.JL.LISBG,XDS.KT.LISBG,XDS.BacteriaLISBG",
+        "show": "no",
+        "type": "payLoadType.JianYan"
+    }
+}, {
+    "labelName": "出院资料",
+    "labelValue": "12",
+    "labelPayLoadTypes": {
+        "name": "出院资料",
+        "value": "XDS.BA.FrontPage,XDS.KT.EMR.ChuYuanJiLu,XDS.KT.EMR.ZhuYuanBingAnShouYe,XDS.ABW.FirstMedicalRecord,XDS.KT.EMR.SiWangJiLu,XDS.DeathDiscussion,XDS.ABW.DischargeRecord,XDS.DischargeRecord,XDS.DischargeDiagCertificate,XDS.DeathSummary,XDS.InchargeRecord24HourDeath,XDS.InchargeRecord24Hour,XDS.FrontPage",
+        "show": "yes",
+        "type": "payLoadType.DischargeInformation"
+    }
+}, {
+    "labelName": "护理文书",
+    "labelValue": "1",
+    "labelPayLoadTypes": {
+        "name": "护理文书",
+        "value": "XDS.NURSING.PDA,XDS.NURSING.PC",
+        "show": "yes",
+        "type": "payLoadType.temperature"
+    }
+}]

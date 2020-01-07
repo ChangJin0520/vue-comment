@@ -180,7 +180,7 @@ const computedWatcherOptions = {
 function initComputed(vm: Component, computed: Object) {
     // $flow-disable-line
     const watchers = vm._computedWatchers = Object.create(null)
-    // computed properties are just getters during SSR
+    // computed properties are just getters during SSR // why?
     const isSSR = isServerRendering()
 
     for (const key in computed) {
@@ -194,7 +194,7 @@ function initComputed(vm: Component, computed: Object) {
         }
 
         if (!isSSR) {
-            // create internal watcher for the computed property.
+            // create internal watcher for the computed property. 为计算属性创建内部watcher
             watchers[key] = new Watcher(
                 vm,
                 getter || noop,
@@ -206,6 +206,8 @@ function initComputed(vm: Component, computed: Object) {
         // component-defined computed properties are already defined on the
         // component prototype. We only need to define computed properties defined
         // at instantiation here.
+        // 组件定义的计算属性已经在组件原型上定义。
+        // 我们只需要定义在实例化时定义的计算属性。
         if (!(key in vm)) {
             defineComputed(vm, key, userDef)
         } else if (process.env.NODE_ENV !== 'production') {
@@ -224,6 +226,7 @@ export function defineComputed(
     userDef: Object | Function
 ) {
     const shouldCache = !isServerRendering()
+
     if (typeof userDef === 'function') {
         sharedPropertyDefinition.get = shouldCache ?
             createComputedGetter(key) :
@@ -232,11 +235,12 @@ export function defineComputed(
     } else {
         sharedPropertyDefinition.get = userDef.get ?
             shouldCache && userDef.cache !== false ?
-            createComputedGetter(key) :
-            createGetterInvoker(userDef.get) :
+                createComputedGetter(key) :
+                createGetterInvoker(userDef.get) :
             noop
         sharedPropertyDefinition.set = userDef.set || noop
     }
+
     if (process.env.NODE_ENV !== 'production' &&
         sharedPropertyDefinition.set === noop) {
         sharedPropertyDefinition.set = function() {
@@ -246,6 +250,7 @@ export function defineComputed(
             )
         }
     }
+
     Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 

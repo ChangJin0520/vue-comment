@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="/vue-dev/dist/vue.js"></script>
+    <script src="./vue-dev/dist/vue.js"></script>
 </head>
 
 <body>
     <div id="app">
         <p>{{message}}</p>
+        <p>{{message1}}</p>
+        <p>{{message2}}</p>
     </div>
     <script type="text/javascript">
         var vm = new Vue({
@@ -19,12 +21,26 @@
             data: {
                 message: '第一个vue实例'
             },
-            methods: {
-                log() {
-                    console.log(123)
+            computed: {
+                message1: {
+                    get() {
+                        return this.message + '1'
+                    },
+                    set(val) {
+                        this.message = val
+                    }
+                },
+                message2() {
+                    return this.message1 + '2'
+                }
+            },
+            watch: {
+                msg2(o, n) {
+                    console.log('watch:', o, n)
                 }
             }
         })
+
     </script>
 </body>
 
