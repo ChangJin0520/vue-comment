@@ -35,7 +35,7 @@ export default class Dep {
   }
 
   notify () {
-    // stabilize the subscriber list first
+    // stabilize the subscriber list first 新复制出一份订阅该数据的watcher
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // subs aren't sorted in scheduler if not running async
@@ -45,7 +45,7 @@ export default class Dep {
     }
 
     for (let i = 0, l = subs.length; i < l; i++) {
-      subs[i].update()
+      subs[i].update() // watcher.update
     }
   }
 }

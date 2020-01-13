@@ -92,6 +92,13 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     }
 }
 
+/**
+ * @desc nextTick其实就是把所有获得的任务都存到callbacks数组中
+ *       然后借用一下Promise 把任务做了一个后置
+ * @date 2020-01-09
+ * @author Chang-Jin
+ */
+
 export function nextTick(cb ?: Function, ctx ?: Object) {
     let _resolve
     callbacks.push(() => {
@@ -105,10 +112,12 @@ export function nextTick(cb ?: Function, ctx ?: Object) {
             _resolve(ctx)
         }
     })
+
     if (!pending) {
         pending = true
         timerFunc()
     }
+
     // $flow-disable-line
     if (!cb && typeof Promise !== 'undefined') {
         return new Promise(resolve => {

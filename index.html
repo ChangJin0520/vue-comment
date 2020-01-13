@@ -13,30 +13,26 @@
     <div id="app">
         <p>{{message}}</p>
         <p>{{message1}}</p>
-        <p>{{message2}}</p>
+        <p>{{message1}}</p>
+        <!-- <p>{{message2}}</p> -->
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
             data: {
-                message: '第一个vue实例'
+                message: '1'
             },
             computed: {
-                message1: {
-                    get() {
-                        return this.message + '1'
-                    },
-                    set(val) {
-                        this.message = val
-                    }
+                message1() {
+                    return this.message + '>1'
                 },
                 message2() {
-                    return this.message1 + '2'
+                    return this.message1 + '>2'
                 }
             },
             watch: {
-                msg2(o, n) {
-                    console.log('watch:', o, n)
+                message: function(ov, nv) {
+                    console.log(ov, nv);
                 }
             }
         })

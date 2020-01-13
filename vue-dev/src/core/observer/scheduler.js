@@ -73,7 +73,7 @@ if (inBrowser && !isIE) {
 }
 
 /**
- * Flush both queues and run the watchers.
+ * Flush both queues and run the watchers. 刷新两个队列并运行watcher。
  */
 function flushSchedulerQueue() {
     currentFlushTimestamp = getNow()
@@ -199,6 +199,7 @@ export function queueWatcher(watcher: Watcher) {
                 flushSchedulerQueue()
                 return
             }
+
             nextTick(flushSchedulerQueue)
         }
     }

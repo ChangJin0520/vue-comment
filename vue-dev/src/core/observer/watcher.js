@@ -153,15 +153,18 @@ export default class Watcher {
     /**
      * Subscriber interface.
      * Will be called when a dependency changes.
+     * 订阅接口
+     * 依赖更改时被调用
      */
     update() {
-        /* istanbul ignore else */
+         // computed对应watcher的update处理
         if (this.lazy) {
-            this.dirty = true
-        } else if (this.sync) { // 同步执行的话直接run
+            this.dirty = true // 该标识保证watcher的getter只调用一次(注: computed缓存机制)
+        } else if (this.sync) {
             this.run()
         } else {
-            queueWatcher(this) // 否则先排列当前Watcher
+            // 界面对应watcher的update处理
+            queueWatcher(this)
         }
     }
 
