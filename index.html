@@ -12,28 +12,12 @@
 <body>
     <div id="app">
         <p>{{message}}</p>
-        <p>{{message1}}</p>
-        <p>{{message1}}</p>
-        <!-- <p>{{message2}}</p> -->
     </div>
     <script type="text/javascript">
         var vm = new Vue({
             el: '#app',
             data: {
                 message: '1'
-            },
-            computed: {
-                message1() {
-                    return this.message + '>1'
-                },
-                message2() {
-                    return this.message1 + '>2'
-                }
-            },
-            watch: {
-                message: function(ov, nv) {
-                    console.log(ov, nv);
-                }
             }
         })
 
